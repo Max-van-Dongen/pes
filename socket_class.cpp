@@ -105,6 +105,7 @@ std::optional<std::string> socket_class::get_msg() noexcept {
 	return  std::nullopt;
 }
 
-int socket_class::send_response(int statuscode, std::string buff) {
-	//buff.to_char();
+int socket_class::send_response(int statuscode, char *buff, int len) {
+    send(fp, "good day", 9,0);
+
 }
