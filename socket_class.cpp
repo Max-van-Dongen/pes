@@ -91,40 +91,6 @@ std::optional<socket_class> socket_class::accept_new_host() {
 
     printf("%s", buff);
 
-    /*
-    FILE * fdFile = fopen("test.http", "r");
-
-    if (fdFile == NULL) {
-        std::cout << "error at openfile...\r\n";
-        return {};
-    }
-
-    struct stat stat_buf;
-    fstat((long) fdFile, &stat_buf);
-    off_t offset = 0;
-    ssize_t len = stat_buf.st_size;
-
-    std::cout << "responing with file of " << len << "bytes\r\n";
-    
-    int res = sendfile((long) fdFile, fd, (long *) &offset, len);
-    if (res == -1) {
-        std::cout << "error at sendfile..."<< errno <<"\r\n" ;
-
-        switch (errno) {
-            case EAGAIN: std::cout<<"EAGAIN"; break;
-            case EBADF:  std::cout<<"EBADF"; break;
-            case EFAULT:  std::cout<<"EFAULT"; break;
-            case EINVAL:  std::cout<<"EINVAL"; break;
-            case EIO:  std::cout<<"EIO"; break;
-            case ENOMEM:  std::cout<<"ENOMEM"; break;
-            case EOVERFLOW:  std::cout<<"EOVERFLOW"; break;
-            case ESPIPE:  std::cout<<"ESPIPE"; break;
-        }
-
-        //return {};
-    }
-    */ 
-    send(fd, "good day", 9,0);
     return socket_class(fd, ESTABLISHED);
 }
 
