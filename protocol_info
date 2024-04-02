@@ -1,0 +1,8 @@
+the deamon accept 
+
+http and shordend
+
+~/{{url}};content/~\r\n
+~/{{status_code}};content/~\r\n
+it is ilegal to send \r\n in the content. send \n\r instead
+
