@@ -96,8 +96,7 @@ std::optional<std::string> socket_class::get_msg() noexcept {
 	return  std::nullopt;
 }
 
-int socket_class::send_response(uint8_t statuscode, char *buff, int len) {
-    
+int socket_class::send_response(uint8_t statuscode, const char *buff, int len) {
     std::string msg = std::string("<~ ");
     msg.append(std::to_string(statuscode));
     msg.append("\r\n");

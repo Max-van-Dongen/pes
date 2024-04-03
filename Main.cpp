@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 
         }
 
-        char resp[] = "msg\r\n";
-        first->send_response(200, resp, strlen(resp));
+        std::string resp = a.value_or("error at parsing");
+        first->send_response(200, resp.c_str(), resp.length());
 
     }
 

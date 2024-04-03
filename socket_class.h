@@ -38,7 +38,7 @@ public:
     // get the next msg from the kernel
     std::optional<std::string> get_msg() noexcept; 
 
-    int send_response(uint8_t statuscode, char *buff, int len);
+    int send_response(uint8_t statuscode, const char *buff, int len);
 
 
     void read_msg();
