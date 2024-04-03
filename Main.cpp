@@ -1,4 +1,3 @@
-#include <cstring>
 #include <iostream>
 #include "socket_class.h"
 #include <optional>
@@ -7,23 +6,25 @@
 
 int main(int argc, char *argv[])
 {
-    char ip[20] = "0.0.0.0"; // i can't make an inline ip declaration because it things it a char pointer
-    socket_class socket( ip, 4000); 
+    // make a listening port at 0.0.0.0 with port (int)
+    socket_class socket(4000); 
 
     std::optional<socket_class> first = socket.accept_new_host();
+
+    // TODO 
+    // Check if there is an other server up.
+    // If yes connect to server.
 
     while(true) {
 
         // TODO make it non-blocking
-        std::optional<std::string> a = first->get_msg();
+        std::optional<std::string> in_opt = first->get_msg();
 
-        if (a.has_value() ) {
-            std::cout << a.value();
-
+        if (in_opt.has_value() ) {
+            std::string in_val = in_opt.value();
+            std::cout << in_val;
+            first->send_response(200, in_val.c_str(), in_val.length());
         }
-
-        std::string resp = a.value_or("error at parsing");
-        first->send_response(200, resp.c_str(), resp.length());
 
     }
 

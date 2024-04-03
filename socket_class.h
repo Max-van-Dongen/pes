@@ -6,11 +6,6 @@
 
 typedef char msg;
 
-class netexception: std::exception {
-
-};
-
-// 
 enum socket_state {
     ESTABLISHED = 1,
     listening = 0,
@@ -19,19 +14,15 @@ enum socket_state {
 
 class socket_class {
 public:
-    int open_lissenig_ports;
-    
     /// readable version of ip addr
     char ipaddr[20];
     int port;
-
 
     // create a tcp listening port
     socket_class(char ip[20], int port);
     
     // create a tcp listening port to avalible port av broadcast
     socket_class(int port);
-
 
     std::optional<socket_class> accept_new_host();
 
@@ -40,9 +31,7 @@ public:
 
     int send_response(uint8_t statuscode, const char *buff, int len);
 
-
     void read_msg();
-
 
 private:
     int fp;
@@ -55,4 +44,3 @@ private:
      
     }
 };
-
