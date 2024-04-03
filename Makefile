@@ -1,2 +1,2 @@
-./out:  ./*.cpp
-	g++ *.cpp -o out
+./out:  ./Main.cpp ./socket_class.h ./socket_class.cpp
+	g++ Main.cpp socket_class.cpp -o out

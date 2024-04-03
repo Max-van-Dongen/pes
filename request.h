@@ -19,8 +19,6 @@ enum request_method {
     DELETE = 3
 };
 
-// IDK if the template works...
-template<int Size>
 class request {
 public:
     request(std::unique_ptr<char> raw);
@@ -35,5 +33,6 @@ private:
 
     char *method;
     char *start_of_body;
-    char raw[Size];
+    std::unique_ptr<char> raw;
+    int raw_len;
 };
