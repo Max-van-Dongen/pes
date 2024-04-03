@@ -1,5 +1,6 @@
 #include "socket_class.h"
 
+#include <charconv>
 #include <iostream>
 #include <string.h>
 
@@ -105,6 +106,13 @@ std::optional<std::string> socket_class::get_msg() noexcept {
 	return  std::nullopt;
 }
 
-int socket_class::send_response(int statuscode, char *buff, int len) {
-    return send(fp, buff, len,0);
+int socket_class::send_response(uint8_t statuscode, char *buff, int len) {
+    
+    std::string msg = std::string("<~ ");
+    msg.append(std::to_string(statuscode));
+    msg.append("\r\n");
+    msg.append(buff, len);
+    msg.append("\r\n\r\n");
+
+    return send(fp, msg.c_str(), msg.length() ,0);
 }
