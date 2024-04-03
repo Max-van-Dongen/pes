@@ -1,6 +1,5 @@
 #include "socket_class.h"
 
-#include <charconv>
 #include <iostream>
 #include <string.h>
 
@@ -12,20 +11,11 @@
 // if syscalls fails you need te separately.
 // see:
 // man://errno(3) 
-#include <errno.h>
+//#include <errno.h>
 
 // for translating to net byte order
 // documentation: man://inet(3)
 #include <arpa/inet.h>
-
-
-#include <sys/types.h>
-
-// I found this! But it did not work. Because of errno 29 illegal seek...
-#include <sys/sendfile.h>
-
-// for geting stats for files
-#include <sys/stat.h>
 
 // but i want to use <expected> but that is c++ 23 :(
 #include <optional>
