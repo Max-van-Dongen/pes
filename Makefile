@@ -1,2 +1,2 @@
-ALL: out *.cpp
+./out:  ./*.cpp
 	g++ *.cpp -o out
