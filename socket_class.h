@@ -21,7 +21,7 @@ public:
     // create a tcp listening port
     socket_class(char ip[20], int port);
     
-    // create a tcp listening port to avalible port av broadcast
+    // create a tcp listening port to available port av broadcast
     socket_class(int port);
 
     std::optional<socket_class> accept_new_host();

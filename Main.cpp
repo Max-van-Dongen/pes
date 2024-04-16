@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     while(true) {
 
-        // TODO make it non-blocking
+        // TODO make it non-blocking AND make it return a class
         std::optional<std::string> in_opt = first->get_msg();
 
         if (in_opt.has_value() ) {

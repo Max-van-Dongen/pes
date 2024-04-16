@@ -17,7 +17,7 @@
 // documentation: man://inet(3)
 #include <arpa/inet.h>
 
-// but i want to use <expected> but that is c++ 23 :(
+// but i want to use <expected> but that is in c++ 23 :(
 #include <optional>
 
 
@@ -31,7 +31,6 @@ socket_class::socket_class(int port) {
 }
 
 socket_class::socket_class(char ip[20], int port) {
-
 
    uint bin_ip_addr = inet_addr(ip);
 
@@ -67,7 +66,7 @@ socket_class::socket_class(char ip[20], int port) {
 }
 
 
-// logic of accepting new clients
+// logic of accepting new clients. And making room for protocol negotiations.
 // TODO: politely close the socket at rejection. 
 std::optional<socket_class> socket_class::accept_new_host() {
     uint fd = accept(fp, NULL, NULL);
