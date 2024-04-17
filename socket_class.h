@@ -1,6 +1,5 @@
 #include <cstdint>
 #include <optional>
-#include <expected>
 #include <exception>
 #include <string>
 
