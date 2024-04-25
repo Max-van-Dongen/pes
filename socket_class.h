@@ -32,6 +32,8 @@ public:
 
     void read_msg();
 
+    void debug_print();
+
 private:
     int fp;
     socket_state state = listening;
