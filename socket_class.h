@@ -23,14 +23,14 @@ public:
     // create a tcp listening port to available port av broadcast
     socket_class(int port);
 
-    std::optional<socket_class> accept_new_host();
+    socket_class accept_new_host();
 
     // get the next msg from the kernel
     std::optional<std::string> get_msg() noexcept; 
 
-    int send_response(uint8_t statuscode, const char *buff, int len);
+    int send_response(char self, char requestType, const void *buff, int len);
 
-    void read_msg();
+    ~socket_class();
 
     void debug_print();
 

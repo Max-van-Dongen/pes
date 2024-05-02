@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 // for socket and ip things
 // also includes sys/socket.h
@@ -95,8 +96,6 @@ socket_class::socket_class(char ip[20], int port) {
         throw std::runtime_error(str);
     }
 
-    char hello[] = "Hello from client";
-    send(sockfp, hello, strlen(hello), 0);
     this->fp = sockfp;
 
     printf("connected with %s:%d with fd %d\r\n", ipaddr, port, sockfp);
@@ -105,18 +104,20 @@ socket_class::socket_class(char ip[20], int port) {
 
 // logic of accepting new clients. And making room for protocol negotiations.
 // TODO: politely close the socket at rejection. 
-std::optional<socket_class> socket_class::accept_new_host() {
+socket_class socket_class::accept_new_host() {
     uint fd = accept(fp, NULL, NULL);
 
-    char buff[300] = {0};
-    int rec = recv(fd, buff, 299, 0); // one removed because of trailing NULL
-
-    if (0 > rec) {
-        std::cout << "hi! I didn't got a msg while opening a connection";
-        return {};
+    if (fd != -1) {
+        switch(errno) {
+            default:
+                printf("unknown error errno: %i", errno);
+                break;
+            case EBADF:
+                    printf("Socket closed :(\r\n");
+                    exit(3);
+                break;
+        }
     }
-
-    printf("%s", buff);
 
     return socket_class(fd, ESTABLISHED);
 }
@@ -132,18 +133,15 @@ std::optional<std::string> socket_class::get_msg() noexcept {
 	return  std::nullopt;
 }
 
-int socket_class::send_response(uint8_t statuscode, const char *buff, int len) {
-    std::string msg = std::string("<~ ");
-    //msg.append(std::to_string(statuscode));
-    //msg.append("\r\n");
-    msg.append(buff, len);
-    //msg.append("\r\n\r\n");
+int socket_class::send_response(char self, char requestType, const void *buff = 0, int len = 0) {
+    return send(fp, buff, len ,0);
+}
 
-    return send(fp, msg.c_str(), msg.length() ,0);
+socket_class::~socket_class() {
+    close(this->fp);
 }
 
 
 void socket_class::debug_print() {
     printf("Debug socket %d\r\n", fp);
-    printf("created by: \r\n");
 }
