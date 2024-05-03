@@ -74,7 +74,6 @@ socket_class::socket_class(char ip[20], int port) {
     {
         throw std::runtime_error("please enter a valid ip addr");
     }
-
     struct sockaddr_in dest = {
         AF_INET,
         htons(4000), // Socket in network byte order (I think big endian)
@@ -85,10 +84,13 @@ socket_class::socket_class(char ip[20], int port) {
 
     if (sockfp == 0) {
         std::cout << "socket is down";
+
+        throw std::runtime_error("what");
     }
 
 
     status = connect(sockfp, (struct sockaddr*) &dest, sizeof(dest));              
+    std::cout << "hi?\r\n";
 
     if (status) {
         char str[40];
@@ -133,8 +135,18 @@ std::optional<std::string> socket_class::get_msg() noexcept {
 	return  std::nullopt;
 }
 
-int socket_class::send_response(char self, char requestType, const void *buff = 0, int len = 0) {
-    return send(fp, buff, len ,0);
+int socket_class::send_response(char self, char datatype = 0, const void *buff = 0, int len = 0) {
+    std::cout << "Kwart over drie";
+    std::string data = std::string();
+    data.append({self});
+    if (len != 0) {
+        data.append({'1'});
+    } else {
+        data.append({'2' , datatype});
+        data.append( (char *) buff);
+        data.append({0});
+    }
+    return send(fp,data.c_str(),data.length(),0);
 }
 
 socket_class::~socket_class() {
