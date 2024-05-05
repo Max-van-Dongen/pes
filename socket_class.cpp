@@ -23,13 +23,49 @@
 #include <optional>
 
 
-// documentation lookup
-// inet_addr see `man://inet(3)`
-// sockaddr_in man://sockaddr(3type)
-//
 socket_class::socket_class(int port) {
-    char ip[20] = "0.0.0.0";
+    char ip[] = "0.0.0.0";
 
+    // inet_addr see `man://inet(3)`
+    uint bin_ip_addr = inet_addr(ip);
+
+    if (bin_ip_addr == INADDR_NONE) 
+    {
+        throw std::runtime_error("please enter a valid ip addr");
+    }
+
+
+    // sockaddr_in man://sockaddr(3type)
+    struct sockaddr_in dest = (sockaddr_in) {
+        AF_INET,
+        htons(port),
+        bin_ip_addr
+    };
+
+    int sockfp = socket(AF_INET,SOCK_STREAM,0);
+
+    if (sockfp == 0) {
+        char err[50];
+        snprintf(err, 49, "Failed to create socket. Errno: %d", errno);
+        throw std::runtime_error(err);
+    }
+
+    if ( bind(sockfp, (struct sockaddr*) &dest, sizeof dest) ) {
+        char err[50];
+        snprintf(err, 49, "failed to bind addr. Errno: %d", errno);
+        throw std::runtime_error(err);
+    }
+
+    strcpy(ipaddr, ip);
+    this->port = port;
+    this->fp = sockfp;
+
+    printf("(socket) listening at %s:%d with fd %d\r\n", ipaddr, port, sockfp);
+    listen(fp, 9);
+}
+
+socket_class::socket_class(char ip[20], int port) {
+    int status = 0;
     uint bin_ip_addr = inet_addr(ip);
 
     if (bin_ip_addr == INADDR_NONE) 
@@ -45,78 +81,48 @@ socket_class::socket_class(int port) {
 
     int sockfp = socket(AF_INET,SOCK_STREAM,0);
 
-    if (sockfp == 0) {
-        std::cout << "socket is down";
-    }
-
-    if (
-            bind(sockfp, (struct sockaddr*) &dest, sizeof dest)
-       )
-    {
+    if (sockfp == -1) {
         char err[40];
-        snprintf(err, 39, "failed to bind addr. Errno: %d", errno);
+        snprintf(err, 39, "failed to create socket. Errno: %d", errno);
         throw std::runtime_error(err);
-    }
-
-    strcpy(ipaddr, ip);
-    this->port = port;
-    this->fp = sockfp;
-
-    printf("listening at %s:%d with fd %d\r\n", ipaddr, port, sockfp);
-    listen(fp, 3);
-}
-
-socket_class::socket_class(char ip[20], int port) {
-    int status = 0;
-    uint bin_ip_addr = inet_addr(ip);
-
-    if (bin_ip_addr == INADDR_NONE) 
-    {
-        throw std::runtime_error("please enter a valid ip addr");
-    }
-    struct sockaddr_in dest = {
-        AF_INET,
-        htons(4000), // Socket in network byte order (I think big endian)
-        bin_ip_addr
-    };
-
-    int sockfp = socket(AF_INET,SOCK_STREAM,0);
-
-    if (sockfp == 0) {
-        std::cout << "socket is down";
-
-        throw std::runtime_error("what");
     }
 
 
     status = connect(sockfp, (struct sockaddr*) &dest, sizeof(dest));              
-    std::cout << "hi?\r\n";
 
     if (status) {
-        char str[40];
-        snprintf(str, 39, "connection failed with errno %d", errno);
-        throw std::runtime_error(str);
+        char resp[50];
+
+        switch (errno) {
+            case ECONNREFUSED:
+                snprintf(resp, 49, "No listening port fount at %s:%d",ip,port);
+                throw std::runtime_error(resp);
+                break;
+
+            default:
+                snprintf(resp, 49, "connection failed with errno %d", errno);
+                throw std::runtime_error(resp);
+                break;
+        }
     }
 
     this->fp = sockfp;
 
-    printf("connected with %s:%d with fd %d\r\n", ipaddr, port, sockfp);
+    printf("(socket) connected with %s:%d with fd %d\r\n", ip, port, sockfp);
 }
 
 
-// logic of accepting new clients. And making room for protocol negotiations.
-// TODO: politely close the socket at rejection. 
 socket_class socket_class::accept_new_host() {
     uint fd = accept(fp, NULL, NULL);
 
-    if (fd != -1) {
+    if (fd == -1) {
         switch(errno) {
             default:
-                printf("unknown error errno: %i", errno);
+                printf("unknown error errno: %i \r\n", errno);
                 break;
             case EBADF:
-                    printf("Socket closed :(\r\n");
-                    exit(3);
+                printf("Socket closed :(\r\n");
+                exit(3);
                 break;
         }
     }
@@ -136,20 +142,22 @@ std::optional<std::string> socket_class::get_msg() noexcept {
 }
 
 int socket_class::send_response(char self, char datatype = 0, const void *buff = 0, int len = 0) {
-    std::cout << "Kwart over drie";
     std::string data = std::string();
     data.append({self});
-    if (len != 0) {
-        data.append({'1'});
+    if (len == 0) {
+        data.append("1");
     } else {
-        data.append({'2' , datatype});
+        data.append("2");
         data.append( (char *) buff);
         data.append({0});
     }
-    return send(fp,data.c_str(),data.length(),0);
+    int status = send(fp,data.c_str(),data.length(),0);
+    printf("(socket) send %s\r\n", (char *) buff);
+    return status;
 }
 
 socket_class::~socket_class() {
+    printf("(socket) closing %i\r\n", fp);
     close(this->fp);
 }
 
