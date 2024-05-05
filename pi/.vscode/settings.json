@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/aron/projects/pi/pes",
+            "binaryPath": "/home/aron/projects/pi/pes/out",
+            "binaryArgs": []
+        }
+    ]
+}
