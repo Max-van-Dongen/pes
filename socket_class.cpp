@@ -1,8 +1,12 @@
 #include "socket_class.h"
 
+//printing to stdout
 #include <iostream>
 #include <stdio.h>
+
 #include <string.h>
+
+// for close()
 #include <unistd.h>
 
 // for socket and ip things
@@ -34,9 +38,8 @@ socket_class::socket_class(int port) {
         throw std::runtime_error("please enter a valid ip addr");
     }
 
-
     // sockaddr_in man://sockaddr(3type)
-    struct sockaddr_in dest = (sockaddr_in) {
+    struct sockaddr_in dest = {
         AF_INET,
         htons(port),
         bin_ip_addr
@@ -60,12 +63,11 @@ socket_class::socket_class(int port) {
     this->port = port;
     this->fp = sockfp;
 
-    printf("(socket) listening at %s:%d with fd %d\r\n", ipaddr, port, sockfp);
     listen(fp, 9);
+    printf("(socket) listening at %s:%d with fd %d\r\n", ipaddr, port, sockfp);
 }
 
 socket_class::socket_class(char ip[20], int port) {
-    int status = 0;
     uint bin_ip_addr = inet_addr(ip);
 
     if (bin_ip_addr == INADDR_NONE) 
@@ -88,7 +90,7 @@ socket_class::socket_class(char ip[20], int port) {
     }
 
 
-    status = connect(sockfp, (struct sockaddr*) &dest, sizeof(dest));              
+    int status = connect(sockfp, (struct sockaddr*) &dest, sizeof(dest));              
 
     if (status) {
         char resp[50];
@@ -112,7 +114,7 @@ socket_class::socket_class(char ip[20], int port) {
 }
 
 
-socket_class socket_class::accept_new_host() {
+socket_class socket_class::accept_new_host() noexcept {
     uint fd = accept(fp, NULL, NULL);
 
     if (fd == -1) {
@@ -132,8 +134,8 @@ socket_class socket_class::accept_new_host() {
 
 std::optional<std::string> socket_class::get_msg() noexcept {
 	char buff[600];
-
 	int bytes_received = recv(this->fp, buff, 99, 0);
+
 	if (bytes_received > 0) {
 		buff[bytes_received] = '\0'; // Null-terminate the string
 		return  std::string(buff);
@@ -141,16 +143,19 @@ std::optional<std::string> socket_class::get_msg() noexcept {
 	return  std::nullopt;
 }
 
-int socket_class::send_response(char self, char datatype = 0, const void *buff = 0, int len = 0) {
+int socket_class::send_response(char self, char datatype = 0, const void *buff = 0, int len = 0) noexcept{
     std::string data = std::string();
     data.append({self});
+
     if (len == 0) {
         data.append("1");
+
     } else {
         data.append("2");
         data.append( (char *) buff);
         data.append({0});
     }
+
     int status = send(fp,data.c_str(),data.length(),0);
     printf("(socket) send %s\r\n", (char *) buff);
     return status;
@@ -160,7 +165,6 @@ socket_class::~socket_class() {
     printf("(socket) closing %i\r\n", fp);
     close(this->fp);
 }
-
 
 void socket_class::debug_print() {
     printf("Debug socket %d\r\n", fp);
