@@ -20,7 +20,7 @@ int main() {
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); // IP address of the server
-    server_addr.sin_port = htons(6789);
+    server_addr.sin_port = htons(16789);
 
     // Connect to remote server
     if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {

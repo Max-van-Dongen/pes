@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-const int PORT = 6789;
+const int PORT = 16789;
 
 // Global map to keep track of clients
 std::map<int, int> client_sockets;
@@ -21,6 +21,7 @@ void display_clients() {
 
 void handle_client(int client_sock) {
     char buffer[1024];
+    int clientId = -1; // Store the client ID
     while (true) {
         memset(buffer, 0, sizeof(buffer));
         int bytes_read = read(client_sock, buffer, sizeof(buffer) - 1);
@@ -33,6 +34,7 @@ void handle_client(int client_sock) {
         std::cout << "Received: " << msg << std::endl;
 
         if (msg.substr(0, 7) == "Client:") {
+            clientId = std::stoi(msg.substr(7));
             int id = std::stoi(msg.substr(7));
             client_sockets[id] = client_sock;
             std::cout << "Client " << id << " registered.\n";
@@ -53,6 +55,11 @@ void handle_client(int client_sock) {
         }
     }
 
+    if (clientId != -1) {
+        client_sockets.erase(clientId);
+        std::cout << "Client " << clientId << " removed from registry.\n";
+        display_clients();
+    }
     // Clean up when client disconnects
     close(client_sock);
 }
