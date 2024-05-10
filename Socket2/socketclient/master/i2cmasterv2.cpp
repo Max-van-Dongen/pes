@@ -99,9 +99,9 @@ int main() {
         std::string currentData(reinterpret_cast<char*>(data), BUFF_SIZE);
         if (data[0] != 0x00) {
             std::cout << "Got Data from i2c: " << currentData << "l: "<< currentData.length() <<std::endl;
-        }
-        
-        if (currentData != lastData || (true && data[0] != 0x00)) {// || TRUE IS TESTING, REMOVE IF ALWAYS SENDING THE SAME INFO
+        //  }
+
+        // if (currentData != lastData || (true && data[0] != 0x00)) {// || TRUE IS TESTING, REMOVE IF ALWAYS SENDING THE SAME INFO
             lastData = currentData;
 
             send(clientSocket, lastData.c_str(), lastData.length(), 0);
