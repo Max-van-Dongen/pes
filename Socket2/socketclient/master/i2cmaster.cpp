@@ -6,7 +6,7 @@
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-
+#define BUFF_SIZE 32
 int main() {
     int clientSocket;
     struct sockaddr_in serverAddr;
@@ -50,23 +50,24 @@ int main() {
     std::cout << "Registered" << std::endl;
 
     while (true) {
-        unsigned char command = 0x01;
-        if (write(i2cFile, &command, 1) != 1) {
+        unsigned char sendData[BUFF_SIZE] = "Test";
+        if (write(i2cFile, &sendData, BUFF_SIZE) != BUFF_SIZE) {
             perror("Failed to write to the I2C bus.\n");
             usleep(500000);
             continue;
         }
+
         std::cout << "Wrote Data Request" << std::endl;
 
-        unsigned char data[128] = {0};
-        if (read(i2cFile, data, 128) < 128) {
+        unsigned char data[BUFF_SIZE] = {0};
+        if (read(i2cFile, data, BUFF_SIZE) < BUFF_SIZE) {
             perror("Failed to read from the I2C bus.\n");
             usleep(500000);
             continue;
         }
         
-        std::string currentData(reinterpret_cast<char*>(data), 128);
-        std::cout << "Got Data: " << currentData << std::endl;
+        std::string currentData(reinterpret_cast<char*>(data), BUFF_SIZE);
+        std::cout << "Got Data from i2c: " << currentData << std::endl;
 
         if (currentData != lastData || true) {// || TRUE IS TESTING, REMOVE IF ALWAYS SENDING THE SAME INFO
             lastData = currentData;
