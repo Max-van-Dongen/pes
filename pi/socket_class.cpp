@@ -53,10 +53,19 @@ socket_class::socket_class(int port) {
         throw std::runtime_error(err);
     }
 
-    if ( bind(sockfp, (struct sockaddr*) &dest, sizeof dest) ) {
-        char err[50];
-        snprintf(err, 49, "failed to bind addr. Errno: %d", errno);
-        throw std::runtime_error(err);
+    int res =  bind(sockfp, (struct sockaddr*) &dest, sizeof dest);
+    if (res == -1) {
+
+        switch(errno) {
+            char err[99];
+            case EADDRINUSE:
+                snprintf(err, 98, "Failed to bind. Someone is all ready using port %i", port);
+                throw std::runtime_error(err);
+            default:
+                snprintf(err, 98, "Failed to bind addr. Errno: %d", errno);
+                throw std::runtime_error(err);
+        }
+
     }
 
     strcpy(ipaddr, ip);
