@@ -40,7 +40,7 @@ void loop() {
     Serial.println("Verbonden met server");
     Serial.printf("status: %i\r\n", client.status());
     
-    sendmsg('a','v');
+    sendmsg('b',"iku");
     
     delay(100);
     digitalWrite(ledje, LOW);
@@ -58,9 +58,9 @@ void loop() {
     Serial.println();
 }
 
-void sendmsg(char dest, char data) {
+void sendmsg(char dest, char *data) {
   char buff[50];
   
-  sprintf(buff, "%c%c%c", clientId, dest, data);
+  sprintf(buff, "%c%c%s", clientId, dest, data);
   client.write(buff);
 }
