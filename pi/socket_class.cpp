@@ -47,7 +47,7 @@ socket_class::socket_class(int port) {
 
     int sockfp = socket(AF_INET,SOCK_STREAM,0);
 
-    if (sockfp == 0) {
+    if (sockfp == -1) {
         char err[50];
         snprintf(err, 49, "Failed to create socket. Errno: %d", errno);
         throw std::runtime_error(err);
@@ -128,6 +128,8 @@ socket_class socket_class::accept_new_host() noexcept {
                 break;
         }
     }
+
+    printf("accepted %i\r\n", fd);
 
     return socket_class(fd, ESTABLISHED);
 }

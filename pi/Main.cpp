@@ -5,10 +5,11 @@
 #include <optional>
 #include <strings.h>
 
+void teardown(int);
 
-
+socket_class *socket = 0;
 int main(int argc, char **argv) {
-    socket_class *socket = 0;
+    signal(SIGINT, *teardown); // handle <ctrl-c>
 
 
     // argc == 1 is no args given
@@ -36,6 +37,14 @@ int main(int argc, char **argv) {
 
         if (msg.has_value()) {
             std::cout << msg.value() << std::endl;
+        }
+
+        usleep(1000000);
+
+        msg = newsocket.get_msg();
+
+        if (msg.has_value()) {
+            std::cout << msg.value() << std::endl;
             newsocket.send_response('2','1', "Hi peter", 9 );
         }
         // newsocket goes out of scope. so socket get closed
@@ -43,4 +52,14 @@ int main(int argc, char **argv) {
 
     delete socket;
     return 0;
+}
+
+void teardown(int signal) {
+    printf("\r\nGot sigint. Exiting...\r\n");
+    delete socket;
+
+    usleep(2000); // In microseconds (1000000 is 1 sec)
+                  // Needed because otherwise linux thinks the port is still listening
+                  // while the server isn't running...
+    exit(0);
 }
