@@ -31,36 +31,46 @@ void setup() {
   
 }
 
+struct response {
+  char server;
+  char datatype;
+  String data;
+};
+
+struct response sendmsg(char dest, char *data) {
+  
+  char buff[50];
+  sprintf(buff, "%c%c%s\0", clientId, dest, data);
+  client.write(buff);
+  
+  delay(40);
+
+  struct response res;
+  res.server = client.read();
+  res.datatype = client.read();
+
+  if (res.datatype == '2') {
+    res.data = client.readString();
+  }
+  
+  return res;
+}
+
 void loop() {
   if (!client.connect(serverIP, serverPort)) { 
     Serial.println("Verbinding mislukt. Opnieuw proberen...");
     delay(5000);
     return;
   }
-    Serial.println("Verbonden met server");
-    Serial.printf("status: %i\r\n", client.status());
     
-    sendmsg('b',"iku");
-    
-    delay(100);
-    digitalWrite(ledje, LOW);
-    digitalWrite(ledje2, LOW);
-    
-    delay(2500);
-    //if (client.read() != -1) {
-      ontvangst = client.read();
-    while (ontvangst != -1) {
-      Serial.printf("%c",ontvangst);
+  struct response res = sendmsg('b',"iku");
 
-
-      ontvangst = client.read();
-    }
-    Serial.println();
-}
-
-void sendmsg(char dest, char *data) {
-  char buff[50];
   
-  sprintf(buff, "%c%c%s", clientId, dest, data);
-  client.write(buff);
+  if (res.datatype == '2') {
+    Serial.println(res.data.c_str());
+  } else {
+    Serial.println("got nothing :(");
+  }
+
+  delay(500);
 }
