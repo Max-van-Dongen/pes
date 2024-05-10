@@ -50,6 +50,14 @@ int main() {
             break;
         }
         std::cout << "Received data: " << buffer << std::endl;
+        if (buffer == "PleaseGetThisLongMessage") {
+            
+            std::string response = "Send:14:LedOn";
+            if (send(sock, response.c_str(), response.length(), 0) < 0) {
+                std::cerr << "Send failed\n";
+                return 1;
+            }
+        }
     }
 
     close(sock);

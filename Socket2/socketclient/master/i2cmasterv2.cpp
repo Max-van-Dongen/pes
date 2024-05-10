@@ -49,16 +49,46 @@ int main() {
     send(clientSocket, msgc, strlen(msgc), 0);
     std::cout << "Registered" << std::endl;
 
+    fcntl(clientSocket, F_SETFL, O_NONBLOCK);
     while (true) {
-        unsigned char sendData[BUFF_SIZE] = "Test";
-        if (write(i2cFile, &sendData, BUFF_SIZE) != BUFF_SIZE) {
-            perror("Failed to write to the I2C bus.\n");
-            usleep(500000);
-            continue;
+        // unsigned char sendData[BUFF_SIZE] = "Test";
+        // if (write(i2cFile, &sendData, BUFF_SIZE) != BUFF_SIZE) {
+        //     perror("Failed to write to the I2C bus.\n");
+        //     usleep(500000);
+        //     continue;
+        // }
+
+        // std::cout << "Wrote Data Request" << std::endl;
+
+
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(clientSocket, &readfds);
+        struct timeval tv;
+        tv.tv_sec = 0;  // Set the timeout to 0 so select doesn't block
+        tv.tv_usec = 0;
+        if (select(clientSocket + 1, &readfds, NULL, NULL, &tv) > 0) {
+            // If select() returns > 0, there is data to read on the socket
+            char buffer[1024];
+            memset(buffer, 0, sizeof(buffer));
+            ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+            if (bytesRead > 0) {
+                // Process the data from the socket
+                std::cout << "Received data from server: " << buffer << std::endl;
+
+                // Prepare the data to be sent over the I2C bus
+                unsigned char i2cData[BUFF_SIZE] = {0};
+                memcpy(i2cData, buffer, bytesRead < BUFF_SIZE ? bytesRead : BUFF_SIZE);
+
+                // Send the data back over the I2C bus
+                if (write(i2cFile, i2cData, BUFF_SIZE) != BUFF_SIZE) {
+                    perror("Failed to write to the I2C bus.\n");
+                    usleep(500000);
+                    continue;
+                }
+                std::cout << "Sent data back over I2C: " << buffer << std::endl;
+            }
         }
-
-        std::cout << "Wrote Data Request" << std::endl;
-
         unsigned char data[BUFF_SIZE] = {0};
         if (read(i2cFile, data, BUFF_SIZE) < BUFF_SIZE) {
             perror("Failed to read from the I2C bus.\n");
@@ -67,9 +97,11 @@ int main() {
         }
         
         std::string currentData(reinterpret_cast<char*>(data), BUFF_SIZE);
-        std::cout << "Got Data from i2c: " << currentData << std::endl;
+        if (data[0] != 0x00) {
+            std::cout << "Got Data from i2c: " << currentData << "l: "<< currentData.length() <<std::endl;
+        //  }
 
-        if (currentData != lastData || true) {// || TRUE IS TESTING, REMOVE IF ALWAYS SENDING THE SAME INFO
+        // if (currentData != lastData || (true && data[0] != 0x00)) {// || TRUE IS TESTING, REMOVE IF ALWAYS SENDING THE SAME INFO
             lastData = currentData;
 
             send(clientSocket, lastData.c_str(), lastData.length(), 0);
