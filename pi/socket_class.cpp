@@ -129,16 +129,16 @@ socket_class socket_class::accept_new_host() noexcept {
     if (fd == -1) {
         switch(errno) {
             default:
-                printf("unknown error errno: %i \r\n", errno);
+                printf("(socket) unknown error errno: %i \r\n", errno);
                 break;
             case EBADF:
-                printf("Socket closed :(\r\n");
+                printf("(socket) Socket closed :( exit\r\n");
                 exit(3);
                 break;
         }
     }
 
-    printf("accepted %i\r\n", fd);
+    printf("(socket) Accepted %i\r\n", fd);
 
     return socket_class(fd, ESTABLISHED);
 }
@@ -156,8 +156,9 @@ std::optional<std::string> socket_class::get_msg() noexcept {
 
 int socket_class::send_response(char self, char datatype = 0, const void *buff = 0, int len = 0) noexcept{
     std::string data = std::string();
-    data.append({self});
+    data.push_back(self);
 
+    // datatype
     if (len == 0) {
         data.append("1");
 
@@ -175,8 +176,4 @@ int socket_class::send_response(char self, char datatype = 0, const void *buff =
 socket_class::~socket_class() {
     printf("(socket) closing %i\r\n", fp);
     close(this->fp);
-}
-
-void socket_class::debug_print() {
-    printf("Debug socket %d\r\n", fp);
 }
