@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #define BUFF_SIZE 32
+char clientid[] = "Client:14\n";
 int main() {
     int clientSocket;
     bool knownClientId = false;
@@ -46,9 +47,8 @@ int main() {
     }
     std::cout << "Connected to server!" << std::endl;
 
-    char msgc[] = "Client:14";
-    send(clientSocket, msgc, strlen(msgc), 0);
-    std::cout << "Registered" << std::endl;
+    send(clientSocket, clientid, strlen(clientid), 0);
+    std::cout << "Registered as " << clientid << std::endl;
 
 
 
@@ -116,7 +116,7 @@ int main() {
         //  }
 
         // if (currentData != lastData || (true && data[0] != 0x00)) {// || TRUE IS TESTING, REMOVE IF ALWAYS SENDING THE SAME INFO
-            lastData = currentData;
+            lastData = currentData + '\n';
 
             send(clientSocket, lastData.c_str(), lastData.length(), 0);
             std::cout << "Data sent to server: " << lastData << std::endl;
