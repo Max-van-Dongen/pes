@@ -143,12 +143,25 @@ socket_class socket_class::accept_new_host() noexcept {
     return socket_class(fd, ESTABLISHED);
 }
 
-std::optional<std::string> socket_class::get_msg() noexcept {
+std::optional<std::string> socket_class::get_msg() {
 	char buff[600];
 	int bytes_received = recv(this->fp, buff, 99, 0);
 
+    if (bytes_received == -1 ) {
+        switch (errno) {
+        char error[500];
+            case EBADF:
+                snprintf(error, 98, "(socket:send) Error: invalid socket description (%i)", port);
+                throw std::runtime_error(error);
+                
+            
+        }
+    }
+
+    std::cout << errno;
 	if (bytes_received > 0) {
 		buff[bytes_received] = '\0'; // Null-terminate the string
+        std::cout << buff;
 		return  std::string(buff);
 	}
 	return  std::nullopt;
@@ -176,4 +189,8 @@ int socket_class::send_response(char self, char datatype = 0, const void *buff =
 socket_class::~socket_class() {
     printf("(socket) closing %i\r\n", fp);
     close(this->fp);
+}
+
+void socket_class::debug_print() {
+    std::cout << "\r\n(DEBUG) socketClass " << fp << std::endl;
 }

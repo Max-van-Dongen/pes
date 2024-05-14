@@ -27,7 +27,7 @@ public:
     socket_class accept_new_host() noexcept;
 
     // get the next msg from the kernel
-    std::optional<std::string> get_msg() noexcept; 
+    std::optional<std::string> get_msg(); 
 
     int send_response(char self, char requestType, const void *buff, int len) noexcept;
 

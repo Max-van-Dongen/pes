@@ -1,14 +1,45 @@
 #include <csignal>
 #include <cstring>
+#include <thread>
 #include<unistd.h>
 #include <iostream>
 #include "socket_class.h"
 #include <optional>
 #include <strings.h>
+#include <vector>
 
 #include "requestStore.h"
 
 void teardown(int);
+std::vector<std::thread> processes;
+
+void handleClient(socket_class *fun) {
+        
+    while (true) {
+
+        std::optional<std::string> opt = fun->get_msg();
+
+        if (!opt.has_value()) {
+            continue;;
+        }
+
+        std::string msg = opt.value();
+
+        char requestor = msg[0];
+        char dest = msg[1];
+        const char *data = 2+msg.c_str();
+
+        printf("Got '%s' for '%c' from '%c'\r\n", data, dest, requestor);
+
+        requestMap.at(dest).append(data);
+
+        const char *resp = requestMap.at(requestor).c_str();
+        
+        fun->send_response('1', '2', resp, strlen(resp));
+
+        requestMap.at(requestor).clear();
+    }
+}
 
 socket_class *socket_c = 0;
 int main(int argc, char **argv) {
@@ -29,37 +60,21 @@ int main(int argc, char **argv) {
         }
         exit(0);
 
-    } else if (argc == 3) {
     } else {
         std::cout << "invalid args\r\n";
     }
 
 
     while(true) {
-        auto newsocket =  socket_c->accept_new_host();
 
-        std::optional<std::string> opt = newsocket.get_msg();
+        socket_class *newsocket(new  (socket_class) (  socket_c->accept_new_host() ) );
 
-        if (!opt.has_value()) {
-            continue;
+        newsocket->debug_print();
+        try {
+            std::thread(handleClient, newsocket).detach();
+        } catch (std::exception err) {
+            std::cout << "err:" << err.what() << std::endl;
         }
-
-        std::string msg = opt.value();
-
-        char requestor = msg[0];
-        char dest = msg[1];
-        const char *data = 2+msg.c_str();
-
-        printf("Got '%s' for '%c' from '%c'\r\n", data, dest, requestor);
-
-        requestMap.at(dest).append(data);
-
-        const char *resp = requestMap.at(requestor).c_str();
-        
-        newsocket.send_response('1', '2', resp, strlen(resp));
-
-        requestMap.at(requestor).clear();
-
 
         // newsocket goes out of scope. so socket get closed
     }
@@ -68,12 +83,10 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+
 void teardown(int signal) {
     printf("\r\nGot sigint. Exiting...\r\n");
     delete socket_c;
 
-    usleep(2000); // In microseconds (1000000 is 1 sec)
-                  // Needed because otherwise linux thinks the port is still listening
-                  // while the server isn't running...
     exit(0);
 }
