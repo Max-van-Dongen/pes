@@ -12,15 +12,19 @@ SDA  - D8
 #include <Wire.h>
 #include "SHT31.h"
 
+//todo: Zend naar server als temperatuur veranderd -> rond op server af op 0.5
+//todo: Zenden van isAllowed naar server die hem doorpaast naar STM -> dus niet de binaire waardes van de kaarten
+//todo: Wemos twee keer zenden naar stm die luchtsluis doet én naar de wemos die lichtkrant regelt
+
 constexpr uint8_t RST_PIN = 0;
 constexpr uint8_t SS_PIN = 15;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
-const char* ssid = "coldspot1";
+const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* serverIP = "192.168.230.130";
+const char* serverIP = "192.168.95.130";
 const int serverPort = 6789;
 WiFiClient client;
 
@@ -56,7 +60,8 @@ int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
     return 0;
   }
   if (mfrc522.uid.size == 4 && memcmp(mfrc522.uid.uidByte, myCardUID, 4) == 0) {
-    return 1;
+    return 1;//Hier dus zenden naar server dat degene erin mag
+    client
   }
   return 2;
 }
