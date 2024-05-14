@@ -24,8 +24,9 @@ const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* serverIP = "192.168.95.130";
+const char* serverIP = "192.168.12.207";
 const int serverPort = 6789;
+const char clientId = 'b';
 WiFiClient client;
 
 SHT31 sht(0x44);
@@ -51,6 +52,31 @@ void setup() {
   Serial.println("Setup done");
 }
 
+struct response {
+  char server;
+  char datatype;
+  String data;
+};
+
+struct response sendmsg(char dest, char *data) {
+  
+  char buff[50];
+  sprintf(buff, "%c%c%s\0", clientId, dest, data);
+  client.write(buff);
+  
+  delay(40);
+
+  struct response res;
+  res.server = client.read();
+  res.datatype = client.read();
+  Serial.println("Hij hoort nu te lezen");
+
+  if (res.datatype == '2') {
+    res.data = client.readString();
+  }
+  
+  return res;
+}
 
 int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
   if (!mfrc522.PICC_IsNewCardPresent()) {
@@ -60,8 +86,8 @@ int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
     return 0;
   }
   if (mfrc522.uid.size == 4 && memcmp(mfrc522.uid.uidByte, myCardUID, 4) == 0) {
+    struct response res = sendmsg('a',"Hij mag naar binnen");
     return 1;//Hier dus zenden naar server dat degene erin mag
-    client
   }
   return 2;
 }
@@ -75,6 +101,12 @@ void readSensor() {
   Serial.println(sht.getHumidity(), 1);
 }
 void loop() {
+  if (!client.connect(serverIP, serverPort)) { 
+    Serial.println("Verbinding mislukt. Opnieuw proberen...");
+    delay(5000);
+    return;
+  }
+  
   int isAllowed = checkAccess();
   if (isAllowed == 1) {
     Serial.println("Mag naar binnen");
