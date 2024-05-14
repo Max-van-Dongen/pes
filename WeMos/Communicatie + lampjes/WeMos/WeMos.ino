@@ -28,6 +28,11 @@ void setup() {
   Serial.println("success!");
   Serial.print("IP Address is: ");
   Serial.println(WiFi.localIP());
+  do  {
+    Serial.printf("connecting to %s:%d\r\n", serverIP, serverPort);
+  }while (!client.connect(serverIP, serverPort));
+
+  Serial.println("connected");
   
 }
 
@@ -39,11 +44,16 @@ struct response {
 
 struct response sendmsg(char dest, char *data) {
   
+  if (!client.connected())  {
+    Serial.println("(socket) not connected returning empty");
+    return {0,0,""};
+  }
   char buff[50];
   sprintf(buff, "%c%c%s\0", clientId, dest, data);
-  client.write(buff);
-  
-  delay(40);
+  int dataSend = client.write(buff);
+  Serial.printf("(socket) to %c: %s (%i)\r\n", dest, data, dataSend);  
+
+  delay(80);
 
   struct response res;
   res.server = client.read();
@@ -52,18 +62,12 @@ struct response sendmsg(char dest, char *data) {
   if (res.datatype == '2') {
     res.data = client.readString();
   }
-  
+
   return res;
 }
 
 void loop() {
-  if (!client.connect(serverIP, serverPort)) { 
-    Serial.println("Verbinding mislukt. Opnieuw proberen...");
-    delay(5000);
-    return;
-  }
-    
-  struct response res = sendmsg('b',"iku");
+  struct response res = sendmsg('a',"iku");
 
   
   if (res.datatype == '2') {
@@ -71,6 +75,4 @@ void loop() {
   } else {
     Serial.println("got nothing :(");
   }
-
-  delay(500);
 }
