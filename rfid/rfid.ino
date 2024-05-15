@@ -6,11 +6,11 @@ SCK  - D5
 SDA  - D8
 */
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
 #include <SPI.h>
 #include <MFRC522.h>
 #include <Wire.h>
 #include "SHT31.h"
+#include <ESPAsyncTCP.h>
 
 //todo: Zend naar server als temperatuur veranderd -> rond op server af op 0.5
 //todo: Zenden van isAllowed naar server die hem doorpaast naar STM -> dus niet de binaire waardes van de kaarten
@@ -24,15 +24,20 @@ const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* serverIP = "192.168.12.207";
-const int serverPort = 6789;
-const char clientId = 'b';
-WiFiClient client;
+const char* host = "192.168.217.130";
+const uint16_t port = 16789;
+//const char clientId = 'b';
+
+AsyncClient* client = nullptr;
+
+float oudeTemp = 0.0;
 
 SHT31 sht(0x44);
 
 void setup() {
-  Serial.begin(115200); 
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+
   while (!Serial)
     ;
   Serial.println("Setup");
@@ -41,41 +46,50 @@ void setup() {
   delay(500);
   Wire.begin();
   sht.begin();
-  WiFi.begin(ssid, password);
+
   while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.println("Connecting..");
+    delay(500);
+    Serial.print(".");
   }
-  Serial.print("IP Address is: ");
+
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  Serial.println("Setup done");
-}
-
-struct response {
-  char server;
-  char datatype;
-  String data;
-};
-
-struct response sendmsg(char dest, char *data) {
-  
-  char buff[50];
-  sprintf(buff, "%c%c%s\0", clientId, dest, data);
-  client.write(buff);
-  
-  delay(40);
-
-  struct response res;
-  res.server = client.read();
-  res.datatype = client.read();
-  Serial.println("Hij hoort nu te lezen");
-
-  if (res.datatype == '2') {
-    res.data = client.readString();
+  client = new AsyncClient();
+  if (!client) {  // Check if the client has been correctly created
+    Serial.println("Cannot create client");
+    return;
   }
-  
-  return res;
+
+  // Define event handlers
+  client->onConnect([](void* arg, AsyncClient* c) {
+    Serial.println("Connected");
+    c->write("Client:4\n");
+  },
+                    nullptr);
+
+  client->onError([](void* arg, AsyncClient* c, int8_t error) {
+    Serial.println("Connect Failed");
+    c->close();
+  },
+                  nullptr);
+
+  client->onDisconnect([](void* arg, AsyncClient* c) {
+    Serial.println("Disconnected");
+    delete c;
+  },
+                       nullptr);
+
+  client->onData([](void* arg, AsyncClient* c, void* data, size_t len) {
+    Serial.print("Received: ");
+    Serial.write((uint8_t*)data, len);
+    Serial.println("");
+  },
+                 nullptr);
+
+  // Connect to the server
+  client->connect(host, port);
 }
 
 int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
@@ -86,8 +100,7 @@ int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
     return 0;
   }
   if (mfrc522.uid.size == 4 && memcmp(mfrc522.uid.uidByte, myCardUID, 4) == 0) {
-    struct response res = sendmsg('a',"Hij mag naar binnen");
-    return 1;//Hier dus zenden naar server dat degene erin mag
+    return 1;  //Hier dus zenden naar server dat degene erin mag
   }
   return 2;
 }
@@ -95,30 +108,45 @@ int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
 void readSensor() {
   sht.read();
   Serial.print("Temperature:");
-  Serial.print(sht.getTemperature(), 1);
+  float number = sht.getTemperature();
+  Serial.print(number, 1);
   Serial.print("\t");
   Serial.print("Humidity:");
   Serial.println(sht.getHumidity(), 1);
+  if (oudeTemp != sht.getTemperature()) {
+    char str[50] = "Send:3:";
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", number);  // '%.2f\n' appends the float and a newline
+    if (client->canSend()) {
+    client->write(str);
+    //Serial.println(str);
+    }
+  }
+  oudeTemp = sht.getTemperature();
 }
 void loop() {
-  if (!client.connect(serverIP, serverPort)) { 
-    Serial.println("Verbinding mislukt. Opnieuw proberen...");
-    delay(5000);
-    return;
-  }
-  
-  int isAllowed = checkAccess();
-  if (isAllowed == 1) {
-    Serial.println("Mag naar binnen");
-  } else if (isAllowed == 2) {
-    Serial.println("Mag niet naar binnen");
-  }
-  readSensor();
-  delay(500);
-}
 
+  if (client && client->connected()) {
+
+    int isAllowed = checkAccess();
+    if (isAllowed == 1) {
+      Serial.println("Mag naar binnen");
+      client->write("Send:3:DeurOpen\n");  //Waar wil ik heen en welke boodscha
+    } else if (isAllowed == 2) {
+      Serial.println("Mag niet naar binnen");
+      client->write("Send:3:DeurDicht\n");
+    }
+    readSensor();
+    delay(2000);
+  } else {
+    Serial.println("Client not connected");
+    if (!client->connecting()) {
+      client->connect(host, port);
+    }
+    delay(500);
+  }
+}
 // Helper routine to dump a byte array as hex values to Serial
-void dump_byte_array(byte *buffer, byte bufferSize) {
+void dump_byte_array(byte* buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
     Serial.print(buffer[i], HEX);
