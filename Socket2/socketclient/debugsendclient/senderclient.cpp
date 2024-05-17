@@ -31,7 +31,7 @@ int main() {
     std::string message;
     std::cout << "Enter message: ";
     std::getline(std::cin, message);
-
+    message += '\n';
     // Send the message to the server
     int bytesSent = send(sockfd, message.c_str(), message.length(), 0);
     if (bytesSent == -1) {
