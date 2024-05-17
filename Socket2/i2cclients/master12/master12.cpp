@@ -6,8 +6,8 @@
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#define BUFF_SIZE 32
-char clientid[] = "Client:14\n";
+#define BUFF_SIZE 16
+char clientid[] = "Client:12\n";
 int main() {
     int clientSocket;
     bool knownClientId = false;
@@ -24,6 +24,7 @@ int main() {
     }
 
     // Specify the address of the I2C Slave
+    // int addr = 0x12;
     int addr = 0x12;
     if (ioctl(i2cFile, I2C_SLAVE, addr) < 0) {
         perror("Failed to acquire bus access and/or talk to slave.\n");
@@ -69,7 +70,7 @@ int main() {
             ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
             if (bytesRead > 0) {
                 // Process the data from the socket
-                std::cout << "Received data from server: " << buffer << std::endl;
+                std::cout << "SOCK DATA: " << buffer << std::endl;
 
                 // Prepare the data to be sent over the I2C bus
                 unsigned char i2cData[BUFF_SIZE] = {0};
@@ -81,7 +82,7 @@ int main() {
                     usleep(500000);
                     continue;
                 }
-                std::cout << "Sent data back over I2C: " << buffer << std::endl;
+                std::cout << "SOCK > I2C: " << buffer << std::endl;
             }
         }
         // if (!knownClientId) {
@@ -112,14 +113,14 @@ int main() {
         
         std::string currentData(reinterpret_cast<char*>(data), BUFF_SIZE);
         if (data[0] != 0x00) {
-            std::cout << "Got Data from i2c: " << currentData << "l: "<< currentData.length() <<std::endl;
+            std::cout << "I2C DATA: " << currentData << "l: "<< currentData.length() <<std::endl;
         //  }
 
         // if (currentData != lastData || (true && data[0] != 0x00)) {// || TRUE IS TESTING, REMOVE IF ALWAYS SENDING THE SAME INFO
             lastData = currentData + '\n';
 
             send(clientSocket, lastData.c_str(), lastData.length(), 0);
-            std::cout << "Data sent to server: " << lastData << std::endl;
+            std::cout << "I2C > SOCK: " << lastData << std::endl;
         }
         usleep(500000);
     }

@@ -65,8 +65,8 @@ void handle_client(int client_sock) {
         int bytes_read = read(client_sock, temp, sizeof(temp) - 1);
         if (bytes_read <= 0) {
             std::cout << "Client disconnected or read error\n";
-            client_sockets.erase(client_sock);
-            std::cout << "Client socket " << client_sock << " removed from registry.\n";
+            client_sockets.erase(clientId);
+            std::cout << "Client socket " << clientId << " removed from registry.\n";
             display_clients();
             break;
         }
