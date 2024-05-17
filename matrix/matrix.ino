@@ -18,7 +18,7 @@ MD_Parola myDisplay = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* host = "192.168.217.130";
+const char* host = "192.168.54.130";
 const uint16_t port = 16789;
 
 AsyncClient* client = nullptr;
