@@ -21,43 +21,8 @@ void display_clients() {
 
 void handle_client(int client_sock) {
 
-    // char buffer[1024];
     int clientId = -1; // Store the client ID
-    // while (true) {
-    //     memset(buffer, 0, sizeof(buffer));
-    //     int bytes_read = read(client_sock, buffer, sizeof(buffer) - 1);
-    //     if (bytes_read <= 0) {
-    //         std::cout << "Client disconnected or read error\n";
-    //     client_sockets.erase(clientId);
-    //     std::cout << "Client " << clientId << " removed from registry.\n";
-    //     display_clients();
-    //         break;
-    //     }
 
-    //     std::string msg(buffer);
-    //     std::cout << "Received: " << msg << std::endl;
-
-    //     if (msg.substr(0, 7) == "Client:") {
-    //         clientId = std::stoi(msg.substr(7));
-    //         int id = std::stoi(msg.substr(7));
-    //         client_sockets[id] = client_sock;
-    //         std::cout << "Client " << id << " registered.\n";
-    //         display_clients();
-    //     } else if (msg.substr(0, 5) == "Send:") {
-    //         size_t pos = msg.find(':');
-    //         size_t next_pos = msg.find(':', pos + 1);
-    //         int target_id = std::stoi(msg.substr(pos + 1, next_pos - pos - 1));
-    //         std::string data = msg.substr(next_pos + 1);
-
-    //         if (client_sockets.find(target_id) != client_sockets.end()) {
-    //             int target_sock = client_sockets[target_id];
-    //             send(target_sock, data.c_str(), data.size(), 0);
-    //             std::cout << "Data sent to client " << target_id << std::endl;
-    //         } else {
-    //             std::cout << "Target client not found\n";
-    //         }
-    //     }
-    // }
     
     std::string buffer;  // Use a std::string to accumulate data
     while (true) {
@@ -85,20 +50,6 @@ void handle_client(int client_sock) {
                 std::cout << "Client " << clientId << " registered.\n";
                 display_clients();
             } else if (msg.substr(0, 5) == "Send:") {
-                // size_t colon_pos = msg.find(':', 5);
-                // size_t next_colon_pos = msg.find(':', colon_pos + 1);
-                // if (colon_pos != std::string::npos && next_colon_pos != std::string::npos) {
-                //     int target_id = std::stoi(msg.substr(colon_pos + 1, next_colon_pos - colon_pos - 1));
-                //     std::string data = msg.substr(next_colon_pos + 1);
-
-                //     if (client_sockets.find(target_id) != client_sockets.end()) {
-                //         int target_sock = client_sockets[target_id];
-                //         send(target_sock, data.c_str(), data.size(), 0);
-                //         std::cout << "Data sent to client " << target_id << std::endl;
-                //     } else {
-                //         std::cout << "Target client not found\n";
-                //     }
-                // }
                     size_t pos = msg.find(':');
                     size_t next_pos = msg.find(':', pos + 1);
                     int target_id = std::stoi(msg.substr(pos + 1, next_pos - pos - 1));
