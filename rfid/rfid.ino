@@ -18,13 +18,14 @@ SDA  - D8
 
 constexpr uint8_t RST_PIN = 0;
 constexpr uint8_t SS_PIN = 15;
+const int lampje = 16;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* host = "192.168.217.130";
+const char* host = "192.168.54.130";
 const uint16_t port = 16789;
 //const char clientId = 'b';
 
@@ -36,6 +37,7 @@ SHT31 sht(0x44);
 
 void setup() {
   Serial.begin(115200);
+  pinMode(lampje, OUTPUT);
   WiFi.begin(ssid, password);
 
   while (!Serial)
@@ -130,13 +132,16 @@ void loop() {
     int isAllowed = checkAccess();
     if (isAllowed == 1) {
       Serial.println("Mag naar binnen");
-      client->write("Send:3:DeurOpen\n");  //Waar wil ik heen en welke boodscha
+      client->write("Send:15:Inside\n");  //Waar wil ik heen en welke boodschap
+      analogWrite(lampje, 10000);
     } else if (isAllowed == 2) {
       Serial.println("Mag niet naar binnen");
-      client->write("Send:3:DeurDicht\n");
+      analogWrite(lampje, 0);
+      //client->write("Send:12:DeurDicht\n");
     }
     readSensor();
     delay(2000);
+    analogWrite(lampje, 50);
   } else {
     Serial.println("Client not connected");
     if (!client->connecting()) {
