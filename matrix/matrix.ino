@@ -27,7 +27,8 @@ AsyncClient* client = nullptr;
 float temperature = 0.0;
 float humidity = 0.0;
 unsigned long previousMillis = 0;
-const long interval = 5000;  // 2 seconds interval
+const long interval = 200;  // ms
+int tempDuration = 20000; /*ms*/        
 bool showTemp = true;
 
 void setup() {
@@ -163,21 +164,23 @@ void loop() {
 
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
+
+    showTemp = (millis() % tempDuration*2) >= tempDuration;
+
+    char textToDisplay[10];
+
     if (showTemp) {
       Serial.print("Temperature: ");
       Serial.println(temperature);
-      char tempDisplay[10];
-      sprintf(tempDisplay, "%2.1f%cC", temperature, '\xB0');
+      sprintf(textToDisplay, "%2.1f%cC", temperature, '\xB0');
       myDisplay.setTextAlignment(PA_CENTER);
-      myDisplay.print(tempDisplay);
+      myDisplay.print(textToDisplay);
     } else {
       Serial.print("Humidity: ");
       Serial.println(humidity);
-      char tempDisplay[10];
-      sprintf(tempDisplay, "%.1f%%", humidity);
+      sprintf(textToDisplay, "%.1f%%", humidity);
       myDisplay.setTextAlignment(PA_CENTER);
-      myDisplay.print(tempDisplay);
+      myDisplay.print(textToDisplay);
     }
-    showTemp = !showTemp;  // Toggle between temperature and humidity
   }
 }
