@@ -70,8 +70,9 @@ void setup() {
                        nullptr);
 
   client->onData([](void* arg, AsyncClient* c, void* data, size_t len) {
-    Serial.print("Received: ");
-    Serial.write((uint8_t*)data, len);
+    Serial.print("\nReceived: ");
+    //Serial.write((uint8_t*)data, len);
+    //Serial.println();
     String receivedData = String((char*)data).substring(0, len);
     processReceivedString(receivedData);
     // float temperature = receivedData.toFloat();
@@ -132,6 +133,10 @@ void processReceivedString(String input) {
     if (endIndex == -1) endIndex = input.length();  // If no space found and no Humid:, use the end of the string
     String tempValueString = input.substring(startIndex, endIndex);
     temperature = tempValueString.toFloat();
+
+    Serial.print("temperature: ");
+    Serial.println(temperature, 1);
+
   }
 
   if (humidIndex != -1) {
@@ -140,6 +145,9 @@ void processReceivedString(String input) {
     if (endIndex == -1) endIndex = input.length();  // If no space found, use the end of the string
     String humidValueString = input.substring(startIndex, endIndex);
     humidity = humidValueString.toFloat();
+
+    Serial.print("humidity: ");
+    Serial.println(humidity, 1);
   }
 }
 
@@ -170,14 +178,14 @@ void loop() {
     char textToDisplay[10];
 
     if (showTemp) {
-      Serial.print("Temperature: ");
-      Serial.println(temperature);
+      Serial.print("T");
+      
       sprintf(textToDisplay, "%2.1f%cC", temperature, '\xB0');
       myDisplay.setTextAlignment(PA_CENTER);
       myDisplay.print(textToDisplay);
     } else {
-      Serial.print("Humidity: ");
-      Serial.println(humidity);
+      Serial.print("H");
+
       sprintf(textToDisplay, "%.1f%%", humidity);
       myDisplay.setTextAlignment(PA_CENTER);
       myDisplay.print(textToDisplay);
