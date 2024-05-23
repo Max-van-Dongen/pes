@@ -31,7 +31,7 @@ const uint16_t port = 16789;
 
 AsyncClient* client = nullptr;
 
-float oudeTemp = 0.0;
+
 
 SHT31 sht(0x44);
 
@@ -107,23 +107,57 @@ int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
   return 2;
 }
 
+float oudeTemp = 0.0;
+float oudeHumid = 0.0;
+
 void readSensor() {
   sht.read();
   Serial.print("Temperature:");
-  float number = sht.getTemperature();
-  Serial.print(number, 1);
-  Serial.print("\t");
-  Serial.print("Humidity:");
-  Serial.println(sht.getHumidity(), 1);
-  if (oudeTemp != sht.getTemperature()) {
+  float nieuwTemp = sht.getTemperature();
+  Serial.print(nieuwTemp, 2);
+
+  const float drempelWaardeTempHoog = oudeTemp + 0.09;
+  const float drempelWaardeTempLaag = oudeTemp - 0.09;
+
+  if (  drempelWaardeTempHoog <= nieuwTemp || drempelWaardeTempLaag >= nieuwTemp ) {
+
     char str[50] = "Send:3:";
-    snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", number);  // '%.2f\n' appends the float and a newline
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "Temp:%.1f\n", nieuwTemp);  // '%.2f\n' appends the float and a newline
+    client->
     if (client->canSend()) {
+      oudeTemp = nieuwTemp;
     client->write(str);
-    //Serial.println(str);
+    Serial.print(" (send)");    
+    } else  {
+      Serial.print(" (err)");      
     }
+  } else {
+    Serial.print("\t");
   }
-  oudeTemp = sht.getTemperature();
+
+  float nieuwHumid = sht.getHumidity();
+  Serial.print("\tHumidity:");
+  Serial.print(nieuwHumid, 2);
+
+  const float drempelWaardeHumHoog = oudeHumid + 0.09; 
+  const float drempelWaardeHumLaag = oudeHumid - 0.09;
+  
+   if (drempelWaardeHumHoog <= nieuwHumid || drempelWaardeHumLaag >= nieuwHumid) {
+    char str[50] = "Send:3:";
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "Humid:%.1f\n", nieuwHumid);  // '%.2f\n' appends the float and a newline
+    if (client->canSend()) {
+      client->write(str);
+      oudeHumid = nieuwHumid;
+
+    Serial.print(" (send)");    
+    } else  {
+      Serial.print(" (err)");      
+    }
+    
+  }
+
+  Serial.println();
+
 }
 void loop() {
 
