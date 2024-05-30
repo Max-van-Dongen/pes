@@ -2,7 +2,8 @@
 #include <MD_Parola.h>
 #include <MD_MAX72xx.h>
 #include <SPI.h>
-
+#include "SHT31.h"
+#include <Wire.h>
 //#include <DebugPrintMacros.h>
 //#define DEBUG_MORE 1
 //#define ASYNC_TCP_DEBUG Serial.printf;
@@ -24,14 +25,16 @@ MD_Parola myDisplay = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* host = "192.168.207.130";
+const char* host = "192.168.48.130";
 const uint16_t port = 16789;
 
 AsyncClient* client = nullptr;
 
+SHT31 sht(0x44);
 
-float temperature = 0.0;
-float humidity = 0.0;
+float temperatureOutside = 0.0;
+float temperatureInside = 0.0;
+float humidityInside = 0.0;
 unsigned long previousMillis = 0;
 const long interval = 200;  // ms
 int tempDuration = 20000; /*ms*/        
@@ -40,6 +43,9 @@ bool showTemp = true;
 void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, password);
+  sht.begin();
+  Wire.begin();
+  SPI.begin();
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -138,10 +144,10 @@ void processReceivedString(String input) {
     int endIndex = (humidIndex != -1 && humidIndex > startIndex) ? humidIndex : input.indexOf(' ', startIndex);
     if (endIndex == -1) endIndex = input.length();  // If no space found and no Humid:, use the end of the string
     String tempValueString = input.substring(startIndex, endIndex);
-    temperature = tempValueString.toFloat();
+    temperatureOutside = tempValueString.toFloat();
 
-    Serial.print("temperature: ");
-    Serial.println(temperature, 1);
+    Serial.print("temperature outside: ");
+    Serial.println(temperatureOutside, 1);
 
   }
 
@@ -150,18 +156,71 @@ void processReceivedString(String input) {
     int endIndex = input.indexOf(' ', startIndex);
     if (endIndex == -1) endIndex = input.length();  // If no space found, use the end of the string
     String humidValueString = input.substring(startIndex, endIndex);
-    humidity = humidValueString.toFloat();
+    humidityInside = humidValueString.toFloat();
 
     Serial.print("humidity: ");
-    Serial.println(humidity, 1);
+    Serial.println(humidityInside, 1);
   }
 }
 
-void displayTemp(float temperature) {
+void displayTemp(float temperatureOutside) {
   char tempDisplay[10];
-  sprintf(tempDisplay, "%2.1f%cC", temperature, '\xB0');
+  sprintf(tempDisplay, "%2.1f%cC", temperatureOutside, '\xB0');
   myDisplay.setTextAlignment(PA_CENTER);
   myDisplay.print(tempDisplay);
+}
+
+float oudeTempInside = 0.0;
+float oudeHumidInside = 0.0;
+
+void readSensor() {
+  sht.read();
+  Serial.print("Temperature Inside:");
+  float nieuwTempInside = sht.getTemperature();
+  Serial.print(nieuwTempInside, 2);
+
+  const float drempelWaardeTempHoogInside = oudeTempInside + 0.09;
+  const float drempelWaardeTempLaagInside = oudeTempInside - 0.09;
+
+  /*if (  drempelWaardeTempHoog <= nieuwTemp || drempelWaardeTempLaag >= nieuwTemp ) {
+
+    char str[50] = "Send:3:";
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "Temp:%.1f\n", nieuwTemp);  // '%.2f\n' appends the float and a newline
+    client->
+    if (client->canSend()) {
+      oudeTemp = nieuwTemp;
+    client->write(str);
+    Serial.print(" (send)");    
+    } else  {
+      Serial.print(" (err)");      
+    }
+  } else {
+    Serial.print("\t");
+  }
+
+  float nieuwHumid = sht.getHumidity();
+  Serial.print("\tHumidity:");
+  Serial.print(nieuwHumid, 2);
+
+  const float drempelWaardeHumHoog = oudeHumid + 0.09; 
+  const float drempelWaardeHumLaag = oudeHumid - 0.09;
+  
+   if (drempelWaardeHumHoog <= nieuwHumid || drempelWaardeHumLaag >= nieuwHumid) {
+    char str[50] = "Send:3:";
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "Humid:%.1f\n", nieuwHumid);  // '%.2f\n' appends the float and a newline
+    if (client->canSend()) {
+      client->write(str);
+      oudeHumid = nieuwHumid;
+
+    Serial.print(" (send)");    
+    } else  {
+      Serial.print(" (err)");      
+    }
+    
+  }
+*/
+  Serial.println();
+
 }
 
 void loop() {
@@ -186,15 +245,17 @@ void loop() {
     if (showTemp) {
       Serial.print("T");
       
-      sprintf(textToDisplay, "%2.1f%cC", temperature, '\xB0');
+      sprintf(textToDisplay, "%2.1f%cC", temperatureOutside, '\xB0');
       myDisplay.setTextAlignment(PA_CENTER);
       myDisplay.print(textToDisplay);
     } else {
       Serial.print("H");
 
-      sprintf(textToDisplay, "%.1f%%", humidity);
+      sprintf(textToDisplay, "%.1f%%", humidityInside);
       myDisplay.setTextAlignment(PA_CENTER);
       myDisplay.print(textToDisplay);
     }
   }
+  readSensor();
+  delay(2000);
 }
