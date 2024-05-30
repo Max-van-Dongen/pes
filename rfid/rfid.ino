@@ -12,8 +12,9 @@ SDA  - D8
 #include "SHT31.h"
 #include <ESPAsyncTCP.h>
 
-//todo: Zend naar server als temperatuur veranderd -> rond op server af op 0.5
 //todo: Zenden van isAllowed naar server die hem doorpaast naar STM -> dus niet de binaire waardes van de kaarten
+    // I do not get it
+
 //todo: Wemos twee keer zenden naar stm die luchtsluis doet én naar de wemos die lichtkrant regelt
 
 constexpr uint8_t RST_PIN = 0;
@@ -65,30 +66,38 @@ void setup() {
   }
 
   // Define event handlers
-  client->onConnect([](void* arg, AsyncClient* c) {
-    Serial.println("Connected");
-    c->write("Client:4\n");
-  },
-                    nullptr);
+  client->onConnect(
+    [](void* arg, AsyncClient* c) {
+      Serial.println("Connected");
+      c->write("Client:4\n");
+    },
+    nullptr
+  );
 
-  client->onError([](void* arg, AsyncClient* c, int8_t error) {
-    Serial.println("Connect Failed");
-    c->close();
-  },
-                  nullptr);
+  client->onError(
+    [](void* arg, AsyncClient* c, int8_t error) {
+      Serial.printf("Connect errored (%i)\r\n", error);
+      c->close();
+    },
+    nullptr
+  );
 
-  client->onDisconnect([](void* arg, AsyncClient* c) {
-    Serial.println("Disconnected");
-    delete c;
-  },
-                       nullptr);
+  client->onDisconnect(
+    [](void* arg, AsyncClient* c) {
+      Serial.println("Disconnected");
+      delete c;
+    },
+    nullptr
+  );
 
-  client->onData([](void* arg, AsyncClient* c, void* data, size_t len) {
-    Serial.print("Received: ");
-    Serial.write((uint8_t*)data, len);
-    Serial.println("");
-  },
-                 nullptr);
+  client->onData(
+    [](void* arg, AsyncClient* c, void* data, size_t len) {
+      Serial.print("Received: ");
+      Serial.write((uint8_t*)data, len);
+      Serial.println("");
+    },
+    nullptr
+  );
 
   // Connect to the server
   client->connect(host, port);
