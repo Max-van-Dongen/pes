@@ -111,6 +111,10 @@ float oudeTemp = 0.0;
 float oudeHumid = 0.0;
 
 void readSensor() {
+  if (!client->canSend() || client->space() < 69 ) {
+      Serial.println("can't send");
+      return;
+  }
   sht.read();
   Serial.print("Temperature:");
   float nieuwTemp = sht.getTemperature();
@@ -122,15 +126,19 @@ void readSensor() {
   if (  drempelWaardeTempHoog <= nieuwTemp || drempelWaardeTempLaag >= nieuwTemp ) {
 
     char str[50] = "Send:3:";
-    snprintf(str + strlen(str), sizeof(str) - strlen(str), "Temp:%.1f\n", nieuwTemp);  // '%.2f\n' appends the float and a newline
-    client->
-    if (client->canSend()) {
-      oudeTemp = nieuwTemp;
-    client->write(str);
-    Serial.print(" (send)");    
-    } else  {
-      Serial.print(" (err)");      
-    }
+      snprintf(str + strlen(str), sizeof(str) - strlen(str), "Temp:%.1f\n", nieuwTemp);  // '%.2f\n' appends the float and a newline
+
+      int wordVerstuurd = client->add(str, strlen(str), 0);
+
+      if (wordVerstuurd == strlen(str)) {
+        Serial.print(" (send)");
+        oudeTemp = nieuwTemp;
+      } else if (wordVerstuurd == 0) {
+        Serial.print(" (won't)");
+      } else {
+        Serial.print(" (part)");
+      }
+      
   } else {
     Serial.print("\t");
   }
@@ -145,19 +153,22 @@ void readSensor() {
    if (drempelWaardeHumHoog <= nieuwHumid || drempelWaardeHumLaag >= nieuwHumid) {
     char str[50] = "Send:3:";
     snprintf(str + strlen(str), sizeof(str) - strlen(str), "Humid:%.1f\n", nieuwHumid);  // '%.2f\n' appends the float and a newline
-    if (client->canSend()) {
-      client->write(str);
-      oudeHumid = nieuwHumid;
+    int wordVerstuurd = client->add(str, strlen(str), 0);
 
-    Serial.print(" (send)");    
-    } else  {
-      Serial.print(" (err)");      
-    }
+    if (wordVerstuurd == strlen(str)) {
+        Serial.print(" (send)");
+        oudeHumid = nieuwHumid;
+      } else if (wordVerstuurd == 0) {
+        Serial.print(" (won't)");
+      } else {
+        Serial.print(" (part)");
+      }
     
   }
 
   Serial.println();
 
+  client->send();
 }
 void loop() {
 
@@ -173,6 +184,7 @@ void loop() {
       analogWrite(lampje, 0);
       //client->write("Send:12:DeurDicht\n");
     }
+
     readSensor();
     delay(2000);
     analogWrite(lampje, 50);
