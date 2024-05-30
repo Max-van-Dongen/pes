@@ -182,13 +182,13 @@ void readSensor() {
   const float drempelWaardeTempHoogInside = oudeTempInside + 0.09;
   const float drempelWaardeTempLaagInside = oudeTempInside - 0.09;
 
-  /*if (  drempelWaardeTempHoog <= nieuwTemp || drempelWaardeTempLaag >= nieuwTemp ) {
+  if (  drempelWaardeTempHoogInside <= nieuwTempInside || drempelWaardeTempLaagInside >= nieuwTempInside ) {
 
-    char str[50] = "Send:3:";
-    snprintf(str + strlen(str), sizeof(str) - strlen(str), "Temp:%.1f\n", nieuwTemp);  // '%.2f\n' appends the float and a newline
-    client->
+    char str[50] = "Send:9:";
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "TempI:%.1f\n", nieuwTempInside);  // '%.2f\n' appends the float and a newline
+    
     if (client->canSend()) {
-      oudeTemp = nieuwTemp;
+      oudeTempInside = nieuwTempInside;
     client->write(str);
     Serial.print(" (send)");    
     } else  {
@@ -198,19 +198,19 @@ void readSensor() {
     Serial.print("\t");
   }
 
-  float nieuwHumid = sht.getHumidity();
-  Serial.print("\tHumidity:");
-  Serial.print(nieuwHumid, 2);
+  float nieuwHumidInside = sht.getHumidity();
+  Serial.print("\tHumidity inside:");
+  Serial.print(nieuwHumidInside, 2);
 
-  const float drempelWaardeHumHoog = oudeHumid + 0.09; 
-  const float drempelWaardeHumLaag = oudeHumid - 0.09;
+  const float drempelWaardeHumHoogInside = oudeHumidInside + 0.09; 
+  const float drempelWaardeHumLaagInside = oudeHumidInside - 0.09;
   
-   if (drempelWaardeHumHoog <= nieuwHumid || drempelWaardeHumLaag >= nieuwHumid) {
-    char str[50] = "Send:3:";
-    snprintf(str + strlen(str), sizeof(str) - strlen(str), "Humid:%.1f\n", nieuwHumid);  // '%.2f\n' appends the float and a newline
+   if (drempelWaardeHumHoogInside <= nieuwHumidInside || drempelWaardeHumLaagInside >= nieuwHumidInside) {
+    char str[50] = "Send:9:";
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "HumidI:%.1f\n", nieuwHumidInside);  // '%.2f\n' appends the float and a newline
     if (client->canSend()) {
       client->write(str);
-      oudeHumid = nieuwHumid;
+      oudeHumidInside = nieuwHumidInside;
 
     Serial.print(" (send)");    
     } else  {
@@ -218,7 +218,7 @@ void readSensor() {
     }
     
   }
-*/
+
   Serial.println();
 
 }
