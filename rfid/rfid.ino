@@ -20,7 +20,9 @@ SDA  - D8
 constexpr uint8_t RST_PIN = 0;
 constexpr uint8_t SS_PIN = 15;
 const int lampje = 16;
+bool hasData = false;
 
+bool newline = false;
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
@@ -120,11 +122,12 @@ float oudeTemp = 0.0;
 float oudeHumid = 0.0;
 
 void readSensor() {
-  if (!client->canSend() || client->space() < 69 ) {
+  if (client->space() < 69 ) {
       Serial.println("can't send");
       return;
   }
   sht.read();
+
   Serial.print("Temperature:");
   float nieuwTemp = sht.getTemperature();
   Serial.print(nieuwTemp, 2);
@@ -135,9 +138,10 @@ void readSensor() {
   if (  drempelWaardeTempHoog <= nieuwTemp || drempelWaardeTempLaag >= nieuwTemp ) {
 
     char str[50] = "Send:3:";
-      snprintf(str + strlen(str), sizeof(str) - strlen(str), "Temp:%.1f\n", nieuwTemp);  // '%.2f\n' appends the float and a newline
+      snprintf(str + strlen(str), sizeof(str) - strlen(str), "Temp:%.1f\n", nieuwTemp);  // '%.1f\n' appends the float and a newline
 
       int wordVerstuurd = client->add(str, strlen(str), 0);
+      hasData = true;
 
       if (wordVerstuurd == strlen(str)) {
         Serial.print(" (send)");
@@ -160,51 +164,76 @@ void readSensor() {
   const float drempelWaardeHumLaag = oudeHumid - 0.09;
   
    if (drempelWaardeHumHoog <= nieuwHumid || drempelWaardeHumLaag >= nieuwHumid) {
-    char str[50] = "Send:3:";
-    snprintf(str + strlen(str), sizeof(str) - strlen(str), "Humid:%.1f\n", nieuwHumid);  // '%.2f\n' appends the float and a newline
+    
+    char str[50] = "Send:3:Humid:";
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", nieuwHumid); 
     int wordVerstuurd = client->add(str, strlen(str), 0);
+    hasData = true;
 
     if (wordVerstuurd == strlen(str)) {
-        Serial.print(" (send)");
+        Serial.print(" (send) ");
         oudeHumid = nieuwHumid;
       } else if (wordVerstuurd == 0) {
         Serial.print(" (won't)");
       } else {
-        Serial.print(" (part)");
+        Serial.print(" (part) ");
       }
     
   }
-
   Serial.println();
-
-  client->send();
 }
+
 void loop() {
 
-  if (client && client->connected()) {
-
-    int isAllowed = checkAccess();
-    if (isAllowed == 1) {
-      Serial.println("Mag naar binnen");
-      client->write("Send:15:Inside\n");  //Waar wil ik heen en welke boodschap
-      analogWrite(lampje, 10000);
-    } else if (isAllowed == 2) {
-      Serial.println("Mag niet naar binnen");
-      analogWrite(lampje, 0);
-      //client->write("Send:12:DeurDicht\n");
-    }
-
-    readSensor();
-    delay(2000);
-    analogWrite(lampje, 50);
-  } else {
+  if (!client || !client->connected() ) {
     Serial.println("Client not connected");
     if (!client->connecting()) {
       client->connect(host, port);
     }
     delay(500);
+    return; 
   }
+
+  if (!client->canSend() ) {
+    Serial.print(".");
+    delay(500);
+    newline = true;
+
+    return;
+  }
+    if (newline) {
+    Serial.println();
+    newline = false;
+  }
+
+
+  int isAllowed = checkAccess();
+
+  if (isAllowed == 1) {
+    Serial.println("Mag naar binnen");
+
+      if (client->space() ) {
+      char command[] = "Send:15:Inside\n";
+      client->add(command, strlen(command), 0);  //Waar wil ik heen en welke boodschap
+      hasData = true;
+    }
+      analogWrite(lampje, 10000);
+  } else if (isAllowed == 2) {
+    Serial.println("Mag niet naar binnen");
+    analogWrite(lampje, 0);
+  }
+
+  readSensor();
+
+  if (hasData) {
+    client->send();
+    hasData = false;
+  }
+
+  delay(1000);
+  analogWrite(lampje, 50);
 }
+
 // Helper routine to dump a byte array as hex values to Serial
 void dump_byte_array(byte* buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
