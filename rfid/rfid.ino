@@ -14,16 +14,18 @@ SDA  - D8
 
 constexpr uint8_t RST_PIN = 0;
 constexpr uint8_t SS_PIN = 15;
-const int lampje = 16;
+const int groen = 16;
+const int rood  = 1;
 bool hasData = false;
 
 bool newline = false;
+
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* host = "192.168.54.130";
+const char* host = "192.168.207.130";
 const uint16_t port = 16789;
 //const char clientId = 'b';
 
@@ -35,12 +37,14 @@ SHT31 sht(0x44);
 
 void setup() {
   Serial.begin(115200);
-  pinMode(lampje, OUTPUT);
+  pinMode(groen, OUTPUT);
+  pinMode(rood, OUTPUT);
   WiFi.begin(ssid, password);
 
   while (!Serial)
     ;
   Serial.println("Setup");
+
   SPI.begin();
   mfrc522.PCD_Init();
   delay(500);
@@ -50,6 +54,7 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
+    newline = true;
   }
 
   Serial.println("WiFi connected");
@@ -66,7 +71,7 @@ void setup() {
   client->onConnect(
     [](void* arg, AsyncClient* c) {
       Serial.println("Connected");
-      c->write("Client:4\n");
+      //c->write("Client:4\n");
     },
     nullptr
   );
@@ -92,6 +97,8 @@ void setup() {
       Serial.print("Received: ");
       Serial.write((uint8_t*)data, len);
       Serial.println("");
+
+      c->write("");
     },
     nullptr
   );
@@ -132,14 +139,14 @@ void readSensor() {
 
   if (  drempelWaardeTempHoog <= nieuwTemp || drempelWaardeTempLaag >= nieuwTemp ) {
 
-    char str[50] = "Send:3:";
-      snprintf(str + strlen(str), sizeof(str) - strlen(str), "Temp:%.1f\n", nieuwTemp);  // '%.1f\n' appends the float and a newline
+    char str[50] = "Send:3:Temp:"; // size 17 - 18 chars (with or without null)
+      snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", nieuwTemp);  // '%.1f\n' appends the float and a newline
 
       int wordVerstuurd = client->add(str, strlen(str), 0);
       hasData = true;
 
       if (wordVerstuurd == strlen(str)) {
-        Serial.print(" (send)");
+        Serial.print(" (add)");
         oudeTemp = nieuwTemp;
       } else if (wordVerstuurd == 0) {
         Serial.print(" (won't)");
@@ -160,13 +167,13 @@ void readSensor() {
   
    if (drempelWaardeHumHoog <= nieuwHumid || drempelWaardeHumLaag >= nieuwHumid) {
     
-    char str[50] = "Send:3:Humid:";
+    char str[50] = "Send:3:Humid:"; // 18 - 19 without null
     snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", nieuwHumid); 
     int wordVerstuurd = client->add(str, strlen(str), 0);
     hasData = true;
 
     if (wordVerstuurd == strlen(str)) {
-        Serial.print(" (send) ");
+        Serial.print(" (add) ");
         oudeHumid = nieuwHumid;
       } else if (wordVerstuurd == 0) {
         Serial.print(" (won't)");
@@ -191,7 +198,7 @@ void loop() {
 
   if (!client->canSend() ) {
     Serial.print(".");
-    delay(500);
+    delay(800);
     newline = true;
 
     return;
@@ -206,31 +213,44 @@ void loop() {
 
   if (isAllowed == 1) {
     Serial.print("Mag naar binnen");
-
-      if (client->space() > 16 ) {
-      char *command = "Send:12:Rfid\n";
-      client->add(command, strlen(command), 0);  //Waar wil ik heen en welke boodschap
-      hasData = true;
+      digitalWrite(groen, 1);
+      if (client->write("Send:12:Rfid\n")) {
       Serial.println(" (send)");
+      return;
 
     } else {
       Serial.println();
+      return;
     }
-      analogWrite(lampje, 10000);
   } else if (isAllowed == 2) {
     Serial.println("Mag niet naar binnen");
-    analogWrite(lampje, 0);
+    digitalWrite(rood, 1);
+    if (client->write("Send:12:RfidF\n")) {
+      Serial.println(" (send)");
+      return;
+
+    } else {
+      Serial.println();
+      return;
+    }
   }
 
   readSensor();
 
   if (hasData) {
-    client->send();
+
+    if (client->send()) {
+      Serial.println("sended");
+    } else {
+      Serial.println("send error?");
+    }
+
     hasData = false;
   }
 
   delay(1000);
-  analogWrite(lampje, 50);
+  analogWrite(groen, 0);
+  analogWrite(rood, 0);
 }
 
 // Helper routine to dump a byte array as hex values to Serial
