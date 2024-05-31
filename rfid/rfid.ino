@@ -12,11 +12,6 @@ SDA  - D8
 #include "SHT31.h"
 #include <ESPAsyncTCP.h>
 
-//todo: Zenden van isAllowed naar server die hem doorpaast naar STM -> dus niet de binaire waardes van de kaarten
-    // I do not get it
-
-//todo: Wemos twee keer zenden naar stm die luchtsluis doet én naar de wemos die lichtkrant regelt
-
 constexpr uint8_t RST_PIN = 0;
 constexpr uint8_t SS_PIN = 15;
 const int lampje = 16;
@@ -122,8 +117,8 @@ float oudeTemp = 0.0;
 float oudeHumid = 0.0;
 
 void readSensor() {
-  if (client->space() < 69 ) {
-      Serial.println("can't send");
+  if (client->space() < 40 ) {
+      Serial.printf("Buffer to short for temp (%i)\r\n", client->space());
       return;
   }
   sht.read();
@@ -210,12 +205,16 @@ void loop() {
   int isAllowed = checkAccess();
 
   if (isAllowed == 1) {
-    Serial.println("Mag naar binnen");
+    Serial.print("Mag naar binnen");
 
-      if (client->space() ) {
-      char command[] = "Send:15:Inside\n";
+      if (client->space() > 16 ) {
+      char *command = "Send:12:Rfid\n";
       client->add(command, strlen(command), 0);  //Waar wil ik heen en welke boodschap
       hasData = true;
+      Serial.println(" (send)");
+
+    } else {
+      Serial.println();
     }
       analogWrite(lampje, 10000);
   } else if (isAllowed == 2) {
