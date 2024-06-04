@@ -25,7 +25,7 @@ MD_Parola myDisplay = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* host = "192.168.48.130";
+const char* host = "10.0.0.3";
 const uint16_t port = 16789;
 
 AsyncClient* client = nullptr;
@@ -37,7 +37,7 @@ float temperatureInside = 0.0;
 float humidityInside = 0.0;
 unsigned long previousMillis = 0;
 const long interval = 200;  // ms
-int tempDuration = 20000; /*ms*/        
+int tempDuration = 10000; /*ms*/        
 bool showTemp = true;
 
 void setup() {
@@ -188,6 +188,7 @@ void readSensor() {
     snprintf(str + strlen(str), sizeof(str) - strlen(str), "TempI:%.1f\n", nieuwTempInside);  // '%.2f\n' appends the float and a newline
     
     if (client->canSend()) {
+      temperatureInside = nieuweTempInside;
       oudeTempInside = nieuwTempInside;
     client->write(str);
     Serial.print(" (send)");    
@@ -257,5 +258,15 @@ void loop() {
     }
   }
   readSensor();
+  //NOT TESTED YET
+  if (temperatureOutside - temperatureInside >= 2 || temperatureOutside - temperatureInside <= 2) {
+      char str[50] = "Send:12:Temp1";
+      client->write(str);
+  }
+  if (temperatureOutside - temperatureInside <= 2 || temperatureOutside - temperatureInside >= 2) {
+      char str[50] = "Send:12:Temp0";
+      client->write(str);
+  }
+  //END NOT TESTED YET
   delay(2000);
 }

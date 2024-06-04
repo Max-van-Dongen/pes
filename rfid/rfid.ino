@@ -25,7 +25,7 @@ const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* host = "192.168.207.130";
+const char* host = "10.0.0.3";
 const uint16_t port = 16789;
 //const char clientId = 'b';
 
@@ -41,8 +41,8 @@ void setup() {
   pinMode(rood, OUTPUT);
   WiFi.begin(ssid, password);
 
-  while (!Serial)
-    ;
+  // while (!Serial)
+  //   ;
   Serial.println("Setup");
 
   SPI.begin();
