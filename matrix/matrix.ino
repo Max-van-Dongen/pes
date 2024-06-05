@@ -23,23 +23,47 @@
 // Create a new instance of the MD_Parola class with hardware SPI connection
 MD_Parola myDisplay = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
+/// advertised wifi id. (what is listed in the connect to wifi screen)
 const char* ssid = "coldspot";
+
+/// of the wifi
 const char* password = "123456781";
+
+/// ip of the server
 const char* host = "10.0.0.3";
+
+/// port op the server
 const uint16_t port = 16789;
 
+/// internal object that is responsible to the tcp connection
 AsyncClient* client = nullptr;
 
+/// vendor logic for the tempriture and humidity 
 SHT31 sht(0x44);
 
 float temperatureOutside = 0.0;
 float temperatureInside = 0.0;
 float humidityInside = 0.0;
+
+
 unsigned long previousMillis = 0;
-const long interval = 200;  // ms
-int tempDuration = 10000; /*ms*/        
+
+/// Milisecond
+const long interval = 200;
+
+// Millisecond
+int tempDuration = 10000;
+
+/** 
+* Internal value to check what is on the schreen. 
+*/
 bool showTemp = true;
 
+/**
+ * create network (tcp) hooks <br>
+ * connect to ssid and server <br>
+ * init display
+ */
 void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, password);
@@ -62,7 +86,7 @@ void setup() {
     return;
   }
 
-  // Define event handlers
+  /// Define event handlers
   client->onConnect([](void* arg, AsyncClient* c) {
     Serial.println("Connected");
     c->write("Client:3\n");
@@ -123,6 +147,9 @@ void setup() {
   // displayFire(true);
 }
 
+/**
+ * an unused warning animaton to signal there is an fire. 
+ */
 void displayFire(int state) {
   while (true) {
     myDisplay.setInvert(true);
@@ -134,7 +161,9 @@ void displayFire(int state) {
   }
 }
 
-
+/**
+ * parse the received tcp package and it modifies 
+ */
 void processReceivedString(String input) {
   int tempIndex = input.indexOf("Temp:");
   int humidIndex = input.indexOf("Humid:");
@@ -173,6 +202,9 @@ void displayTemp(float temperatureOutside) {
 float oudeTempInside = 0.0;
 float oudeHumidInside = 0.0;
 
+/*
+* check if the sensorvalue is change significaly. If so change the values to display.
+*/
 void readSensor() {
   sht.read();
   Serial.print("Temperature Inside:");
@@ -224,6 +256,15 @@ void readSensor() {
 
 }
 
+/**
+ * default arduino loop that is responseable to:
+ * <ul>
+ *    <li> Checks it is still connected to the server.</li>
+ *    <li> reconect to the server </li>
+ *    <li> Drive the matrix display.</li>
+ *    <li> calls the sensor logic </li>
+ * </ul>
+ */
 void loop() {
 
   unsigned long currentMillis = millis();
@@ -257,7 +298,9 @@ void loop() {
       myDisplay.print(textToDisplay);
     }
   }
+
   readSensor();
+
   //NOT TESTED YET
   if (temperatureOutside - temperatureInside >= 2 || temperatureOutside - temperatureInside <= 2) {
       char str[50] = "Send:12:Temp1";
