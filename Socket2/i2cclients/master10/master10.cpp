@@ -13,8 +13,8 @@
 
 #define BUFF_SIZE 16
 
-char clientid[] = "Client:12\n";
-int addr = 0x12;
+char clientid[] = "Client:10\n";
+int addr = 0x10;
 
 // Function to get current timestamp with milliseconds as a string
 std::string getCurrentTimestamp() {
@@ -97,7 +97,7 @@ int main() {
                     usleep(500000);
                     continue;
                 }
-                std::cout << getCurrentTimestamp() << " - SOCK > I2C: " << buffer << std::endl;
+                std::cout << getCurrentTimestamp() << " - SOCK > I2C: " << buffer << '\n' << '\r' << std::endl;
             }
         }
 
