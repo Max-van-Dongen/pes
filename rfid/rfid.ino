@@ -25,13 +25,11 @@ const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
 const char* ssid = "coldspot";
 const char* password = "123456781";
-const char* host = "10.0.0.3";
+const char* host = "192.168.156.130";
 const uint16_t port = 16789;
 //const char clientId = 'b';
 
 AsyncClient* client = nullptr;
-
-
 
 SHT31 sht(0x44);
 
@@ -224,8 +222,12 @@ void loop() {
     }
   } else if (isAllowed == 2) {
     Serial.println("Mag niet naar binnen");
-    digitalWrite(rood, 1);
-    if (client->write("Send:12:RfidF\n")) {
+    /*char *command = "Send:9:RfidF\n";
+      client->add(command, strlen(command), 0);  //Waar wil ik heen en welke boodschap
+      hasData = true;
+      Serial.println(" (send)");
+    digitalWrite(rood, 1);*/
+    if (client->write("Send:9:RfidF\n")) {
       Serial.println(" (send)");
       return;
 
