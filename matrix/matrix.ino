@@ -27,7 +27,7 @@ const char* ssid = "coldspot";
 const char* password = "123456781";
 const char* host = "10.0.0.3";
 const uint16_t port = 16789;
-
+bool bigDiff = false;
 AsyncClient* client = nullptr;
 
 SHT31 sht(0x44);
@@ -37,7 +37,7 @@ float temperatureInside = 0.0;
 float humidityInside = 0.0;
 unsigned long previousMillis = 0;
 const long interval = 200;  // ms
-int tempDuration = 10000; /*ms*/        
+int tempDuration = 10000;   /*ms*/
 bool showTemp = true;
 
 void setup() {
@@ -148,7 +148,6 @@ void processReceivedString(String input) {
 
     Serial.print("temperature outside: ");
     Serial.println(temperatureOutside, 1);
-
   }
 
   if (humidIndex != -1) {
@@ -182,18 +181,18 @@ void readSensor() {
   const float drempelWaardeTempHoogInside = oudeTempInside + 0.09;
   const float drempelWaardeTempLaagInside = oudeTempInside - 0.09;
 
-  if (  drempelWaardeTempHoogInside <= nieuwTempInside || drempelWaardeTempLaagInside >= nieuwTempInside ) {
+  if (drempelWaardeTempHoogInside <= nieuwTempInside || drempelWaardeTempLaagInside >= nieuwTempInside) {
 
     char str[50] = "Send:9:";
     snprintf(str + strlen(str), sizeof(str) - strlen(str), "TempI:%.1f\n", nieuwTempInside);  // '%.2f\n' appends the float and a newline
-    
+
     if (client->canSend()) {
-      temperatureInside = nieuweTempInside;
+      temperatureInside = nieuwTempInside;
       oudeTempInside = nieuwTempInside;
-    client->write(str);
-    Serial.print(" (send)");    
-    } else  {
-      Serial.print(" (err)");      
+      client->write(str);
+      Serial.print(" (send)");
+    } else {
+      Serial.print(" (err)");
     }
   } else {
     Serial.print("\t");
@@ -203,25 +202,23 @@ void readSensor() {
   Serial.print("\tHumidity inside:");
   Serial.print(nieuwHumidInside, 2);
 
-  const float drempelWaardeHumHoogInside = oudeHumidInside + 0.09; 
+  const float drempelWaardeHumHoogInside = oudeHumidInside + 0.09;
   const float drempelWaardeHumLaagInside = oudeHumidInside - 0.09;
-  
-   if (drempelWaardeHumHoogInside <= nieuwHumidInside || drempelWaardeHumLaagInside >= nieuwHumidInside) {
+
+  if (drempelWaardeHumHoogInside <= nieuwHumidInside || drempelWaardeHumLaagInside >= nieuwHumidInside) {
     char str[50] = "Send:9:";
     snprintf(str + strlen(str), sizeof(str) - strlen(str), "HumidI:%.1f\n", nieuwHumidInside);  // '%.2f\n' appends the float and a newline
     if (client->canSend()) {
       client->write(str);
       oudeHumidInside = nieuwHumidInside;
 
-    Serial.print(" (send)");    
-    } else  {
-      Serial.print(" (err)");      
+      Serial.print(" (send)");
+    } else {
+      Serial.print(" (err)");
     }
-    
   }
 
   Serial.println();
-
 }
 
 void loop() {
@@ -239,13 +236,13 @@ void loop() {
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
 
-    showTemp = (millis() % tempDuration*2) >= tempDuration;
+    showTemp = (millis() % tempDuration * 2) >= tempDuration;
 
     char textToDisplay[10];
 
     if (showTemp) {
       Serial.print("T");
-      
+
       sprintf(textToDisplay, "%2.1f%cC", temperatureOutside, '\xB0');
       myDisplay.setTextAlignment(PA_CENTER);
       myDisplay.print(textToDisplay);
@@ -259,13 +256,27 @@ void loop() {
   }
   readSensor();
   //NOT TESTED YET
-  if (temperatureOutside - temperatureInside >= 2 || temperatureOutside - temperatureInside <= 2) {
-      char str[50] = "Send:12:Temp1";
-      client->write(str);
+  float diff = abs(temperatureOutside - temperatureInside);
+  if (diff >= 2 && bigDiff == 1) {
+    bigDiff = 0;
+    char str[50] = "Send:12:Temp1\n";
+    client->write(str);
+    Serial.println("Temp1");
+    myDisplay.setInvert(true);
+    myDisplay.print("TEMP1");
+    myDisplay.setInvert(false);
+
+    delay(250);
   }
-  if (temperatureOutside - temperatureInside <= 2 || temperatureOutside - temperatureInside >= 2) {
-      char str[50] = "Send:12:Temp0";
-      client->write(str);
+  if (diff <= 2 && bigDiff == 0) {
+    bigDiff = 1;
+    char str[50] = "Send:12:Temp0\n";
+    client->write(str);
+    Serial.println("Temp0");
+    myDisplay.setInvert(true);
+    myDisplay.print("TEMP0");
+    myDisplay.setInvert(false);
+    delay(250);
   }
   //END NOT TESTED YET
   delay(2000);
