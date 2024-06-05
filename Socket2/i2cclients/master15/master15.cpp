@@ -1,4 +1,7 @@
 #include <iostream>
+#include <chrono>
+#include <iomanip>
+#include <ctime>
 #include <cstring>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -6,123 +9,114 @@
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <sstream>
+
 #define BUFF_SIZE 16
+
 char clientid[] = "Client:15\n";
+int addr = 0x15;
+
+// Function to get current timestamp with milliseconds as a string
+std::string getCurrentTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    auto now_as_time_t = std::chrono::system_clock::to_time_t(now);
+    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    auto value = now_ms.time_since_epoch();
+    long duration = (long) std::chrono::duration_cast<std::chrono::milliseconds>(value).count();
+    long ms = duration % 1000;
+
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&now_as_time_t), "[%Y-%m-%d %H:%M:%S");
+    ss << '.' << std::setfill('0') << std::setw(3) << ms << "]";
+    return ss.str();
+}
+void perrorWithTimestamp(const char* message) {
+  std::cerr << getCurrentTimestamp() << " - " << message << std::endl;
+  perror(""); // Per standard, perror also prints to stderr
+}
+
 int main() {
     int clientSocket;
     bool knownClientId = false;
     struct sockaddr_in serverAddr;
     char buffer[1024] = {0};
-    std::string lastData; // Use std::string to store the last data
+    std::string lastData;
 
-    // Open I2C bus
     const char *i2cDevice = "/dev/i2c-1";
     int i2cFile;
     if ((i2cFile = open(i2cDevice, O_RDWR)) < 0) {
-        perror("Failed to open the bus.\n");
+        perrorWithTimestamp("Failed to open the bus.\n");
         return 1;
     }
 
-    // Specify the address of the I2C Slave
-    // int addr = 0x15;
-    int addr = 0x15;
     if (ioctl(i2cFile, I2C_SLAVE, addr) < 0) {
-        perror("Failed to acquire bus access and/or talk to slave.\n");
+        perrorWithTimestamp("Failed to acquire bus access and/or talk to slave.\n");
         return 1;
     }
 
-    // Create the socket
     clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (clientSocket < 0) {
-        std::cerr << "Error in socket creation" << std::endl;
+        std::cerr << getCurrentTimestamp() << " - Error in socket creation" << std::endl;
         return 1;
     }
 
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(16789);
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    serverAddr.sin_addr.s_addr = inet_addr("10.0.0.3");
 
     if (connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
-        std::cerr << "Connection Failed" << std::endl;
+        std::cerr << getCurrentTimestamp() << " - Connection Failed" << std::endl;
         return 1;
     }
-    std::cout << "Connected to server!" << std::endl;
+    std::cout << getCurrentTimestamp() << " - Connected to server!" << std::endl;
 
     send(clientSocket, clientid, strlen(clientid), 0);
-    std::cout << "Registered as " << clientid << std::endl;
-
-
+    std::cout << getCurrentTimestamp() << " - Registered as " << clientid << std::endl;
 
     fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+
     while (true) {
-
-
         fd_set readfds;
         FD_ZERO(&readfds);
         FD_SET(clientSocket, &readfds);
         struct timeval tv;
-        tv.tv_sec = 0;  // Set the timeout to 0 so select doesn't block
+        tv.tv_sec = 0;
         tv.tv_usec = 0;
+
         if (select(clientSocket + 1, &readfds, NULL, NULL, &tv) > 0) {
-            // If select() returns > 0, there is data to read on the socket
-            char buffer[1024];
             memset(buffer, 0, sizeof(buffer));
             ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
             if (bytesRead > 0) {
-                // Process the data from the socket
-                std::cout << "SOCK DATA: " << buffer << std::endl;
+                std::cout << getCurrentTimestamp() << " - SOCK DATA: " << buffer << std::endl;
 
-                // Prepare the data to be sent over the I2C bus
                 unsigned char i2cData[BUFF_SIZE] = {0};
                 memcpy(i2cData, buffer, bytesRead < BUFF_SIZE ? bytesRead : BUFF_SIZE);
 
-                // Send the data back over the I2C bus
                 if (write(i2cFile, i2cData, BUFF_SIZE) != BUFF_SIZE) {
-                    perror("Failed to write to the I2C bus.\n");
+                    perrorWithTimestamp("Failed to write to the I2C bus.");
                     usleep(500000);
                     continue;
                 }
-                std::cout << "SOCK > I2C: " << buffer << std::endl;
+                std::cout << getCurrentTimestamp() << " - SOCK > I2C: " << buffer << '\n' << '\r' << std::endl;
             }
         }
-        // if (!knownClientId) {
-        //     unsigned char sendData[BUFF_SIZE] = "ClientIdRequest";
-        //     if (write(i2cFile, sendData, BUFF_SIZE) != BUFF_SIZE) {
-        //         perror("Failed to write to the I2C bus.\n");
-        //         usleep(500000);
-        //     }
-        //     std::cout << "Wrote ClientIdRequest" << std::endl;
-        //     knownClientId = true;
-        //     unsigned char data[BUFF_SIZE] = {0};
-        //     if (read(i2cFile, data, BUFF_SIZE) < BUFF_SIZE) {
-        //         perror("Failed to read from the I2C bus.\n");
-        //         usleep(500000);
-        //         continue;
-        //     }
-        //     std::string currentData(reinterpret_cast<char*>(data), BUFF_SIZE);
-        //     if (data[0] != 0x00) {
-        //         std::cout << "Got Data from i2ccccc: " << currentData << "l: "<< currentData.length() <<std::endl;
-        //     }
-        // }
+
         unsigned char data[BUFF_SIZE] = {0};
         if (read(i2cFile, data, BUFF_SIZE) < BUFF_SIZE) {
-            perror("Failed to read from the I2C bus.\n");
+            perrorWithTimestamp("Failed to read from the I2C bus.");
             usleep(500000);
             continue;
         }
-        
+
         std::string currentData(reinterpret_cast<char*>(data), BUFF_SIZE);
         if (data[0] != 0x00) {
-            std::cout << "I2C DATA: " << currentData << "l: "<< currentData.length() <<std::endl;
-        //  }
+            std::cout << getCurrentTimestamp() << " - I2C DATA: " << currentData << " - L: " << currentData.length() << std::endl;
 
-        // if (currentData != lastData || (true && data[0] != 0x00)) {// || TRUE IS TESTING, REMOVE IF ALWAYS SENDING THE SAME INFO
             lastData = currentData + '\n';
-
             send(clientSocket, lastData.c_str(), lastData.length(), 0);
-            std::cout << "I2C > SOCK: " << lastData << std::endl;
+            std::cout << getCurrentTimestamp() << " - I2C > SOCK: " << lastData << std::endl;
         }
-        usleep(500000);
+        usleep(100000);
     }
 
     close(clientSocket);

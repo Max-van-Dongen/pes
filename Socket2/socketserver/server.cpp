@@ -6,32 +6,42 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <chrono>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
 const int PORT = 16789;
 
 // Global map to keep track of clients
 std::map<int, int> client_sockets;
 
+std::string getCurrentTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&now_c),"[%Y-%m-%d %H:%M:%S]");
+    return ss.str();
+}
 void display_clients() {
-    std::cout << "Currently connected clients:" << std::endl;
+    std::cout << getCurrentTimestamp() << "Currently connected clients:" << std::endl;
     for (const auto& pair : client_sockets) {
-        std::cout << "Client ID: " << pair.first << ", Socket FD: " << pair.second << std::endl;
+        std::cout << getCurrentTimestamp() << "Client ID: " << pair.first << ", Socket FD: " << pair.second << std::endl;
     }
 }
 
 void handle_client(int client_sock) {
-
+    // char buffer[1024];
     int clientId = -1; // Store the client ID
-
-    
+ 
     std::string buffer;  // Use a std::string to accumulate data
     while (true) {
         char temp[1024] = {};  // Temporary buffer to store incoming data
         int bytes_read = read(client_sock, temp, sizeof(temp) - 1);
         if (bytes_read <= 0) {
-            std::cout << "Client disconnected or read error\n";
+            std::cout << getCurrentTimestamp() << "Client disconnected or read error\n";
             client_sockets.erase(clientId);
-            std::cout << "Client socket " << clientId << " removed from registry.\n";
+            std::cout << getCurrentTimestamp() << "Client socket " << clientId << " removed from registry.\n";
             display_clients();
             break;
         }
@@ -41,13 +51,13 @@ void handle_client(int client_sock) {
         size_t pos;
         while ((pos = buffer.find('\n')) != std::string::npos) {  // Process each message separated by '\n'
             std::string msg = buffer.substr(0, pos);  // Extract the message up to '\n'
-            std::cout << "Received: " << msg << std::endl;
+            std::cout << getCurrentTimestamp() << "Received: " << msg << std::endl;
             buffer.erase(0, pos + 1);  // Remove the processed message from buffer
 
             if (msg.substr(0, 7) == "Client:") {
                 int clientId = std::stoi(msg.substr(7));
                 client_sockets[clientId] = client_sock;
-                std::cout << "Client " << clientId << " registered.\n";
+                std::cout << getCurrentTimestamp() << "Client " << clientId << " registered.\n";
                 display_clients();
             } else if (msg.substr(0, 5) == "Send:") {
                     size_t pos = msg.find(':');
@@ -58,9 +68,9 @@ void handle_client(int client_sock) {
                     if (client_sockets.find(target_id) != client_sockets.end()) {
                         int target_sock = client_sockets[target_id];
                         send(target_sock, data.c_str(), data.size(), 0);
-                        std::cout << "Data sent to client " << target_id << std::endl;
+                        std::cout << getCurrentTimestamp() << "Data sent to client " << target_id << std::endl;
                     } else {
-                        std::cout << "Target client not found\n";
+                        std::cout << getCurrentTimestamp() << "Target client not found\n";
                     }
             }
         }
@@ -68,7 +78,7 @@ void handle_client(int client_sock) {
 
     if (clientId != -1) {
         client_sockets.erase(clientId);
-        std::cout << "Client " << clientId << " removed from registry.\n";
+        std::cout << getCurrentTimestamp() << "Client " << clientId << " removed from registry.\n";
         display_clients();
     }
     // Clean up when client disconnects
@@ -96,7 +106,7 @@ int main() {
     }
 
     listen(server_sock, 5);
-    std::cout << "Server listening on port " << PORT << std::endl;
+    std::cout << getCurrentTimestamp() << "Server listening on port " << PORT << std::endl;
 
     while (true) {
         client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &client_len);

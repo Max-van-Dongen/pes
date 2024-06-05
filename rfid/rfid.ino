@@ -15,7 +15,7 @@ SDA  - D8
 constexpr uint8_t RST_PIN = 0;
 constexpr uint8_t SS_PIN = 15;
 const int groen = 16;
-const int rood  = 1;
+const int rood = 1;
 bool hasData = false;
 
 bool newline = false;
@@ -31,8 +31,6 @@ const uint16_t port = 16789;
 
 AsyncClient* client = nullptr;
 
-
-
 SHT31 sht(0x44);
 
 void setup() {
@@ -41,8 +39,8 @@ void setup() {
   pinMode(rood, OUTPUT);
   WiFi.begin(ssid, password);
 
-  // while (!Serial)
-  //   ;
+  while (!Serial)
+    ;
   Serial.println("Setup");
 
   SPI.begin();
@@ -73,24 +71,21 @@ void setup() {
       Serial.println("Connected");
       //c->write("Client:4\n");
     },
-    nullptr
-  );
+    nullptr);
 
   client->onError(
     [](void* arg, AsyncClient* c, int8_t error) {
       Serial.printf("Connect errored (%i)\r\n", error);
       c->close();
     },
-    nullptr
-  );
+    nullptr);
 
   client->onDisconnect(
     [](void* arg, AsyncClient* c) {
       Serial.println("Disconnected");
       delete c;
     },
-    nullptr
-  );
+    nullptr);
 
   client->onData(
     [](void* arg, AsyncClient* c, void* data, size_t len) {
@@ -100,8 +95,7 @@ void setup() {
 
       c->write("");
     },
-    nullptr
-  );
+    nullptr);
 
   // Connect to the server
   client->connect(host, port);
@@ -124,9 +118,9 @@ float oudeTemp = 0.0;
 float oudeHumid = 0.0;
 
 void readSensor() {
-  if (client->space() < 40 ) {
-      Serial.printf("Buffer to short for temp (%i)\r\n", client->space());
-      return;
+  if (client->space() < 40) {
+    Serial.printf("Buffer to short for temp (%i)\r\n", client->space());
+    return;
   }
   sht.read();
 
@@ -137,23 +131,23 @@ void readSensor() {
   const float drempelWaardeTempHoog = oudeTemp + 0.09;
   const float drempelWaardeTempLaag = oudeTemp - 0.09;
 
-  if (  drempelWaardeTempHoog <= nieuwTemp || drempelWaardeTempLaag >= nieuwTemp ) {
+  if (drempelWaardeTempHoog <= nieuwTemp || drempelWaardeTempLaag >= nieuwTemp) {
 
-    char str[50] = "Send:3:Temp:"; // size 17 - 18 chars (with or without null)
-      snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", nieuwTemp);  // '%.1f\n' appends the float and a newline
+    char str[50] = "Send:3:Temp:";                                                // size 17 - 18 chars (with or without null)
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", nieuwTemp);  // '%.1f\n' appends the float and a newline
 
-      int wordVerstuurd = client->add(str, strlen(str), 0);
-      hasData = true;
+    int wordVerstuurd = client->add(str, strlen(str), 0);
+    hasData = true;
 
-      if (wordVerstuurd == strlen(str)) {
-        Serial.print(" (add)");
-        oudeTemp = nieuwTemp;
-      } else if (wordVerstuurd == 0) {
-        Serial.print(" (won't)");
-      } else {
-        Serial.print(" (part)");
-      }
-      
+    if (wordVerstuurd == strlen(str)) {
+      Serial.print(" (add)");
+      oudeTemp = nieuwTemp;
+    } else if (wordVerstuurd == 0) {
+      Serial.print(" (won't)");
+    } else {
+      Serial.print(" (part)");
+    }
+
   } else {
     Serial.print("\t");
   }
@@ -162,78 +156,81 @@ void readSensor() {
   Serial.print("\tHumidity:");
   Serial.print(nieuwHumid, 2);
 
-  const float drempelWaardeHumHoog = oudeHumid + 0.09; 
+  const float drempelWaardeHumHoog = oudeHumid + 0.09;
   const float drempelWaardeHumLaag = oudeHumid - 0.09;
-  
-   if (drempelWaardeHumHoog <= nieuwHumid || drempelWaardeHumLaag >= nieuwHumid) {
-    
-    char str[50] = "Send:3:Humid:"; // 18 - 19 without null
-    snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", nieuwHumid); 
+
+  if (drempelWaardeHumHoog <= nieuwHumid || drempelWaardeHumLaag >= nieuwHumid) {
+
+    char str[50] = "Send:3:Humid:";  // 18 - 19 without null
+    snprintf(str + strlen(str), sizeof(str) - strlen(str), "%.1f\n", nieuwHumid);
     int wordVerstuurd = client->add(str, strlen(str), 0);
     hasData = true;
 
     if (wordVerstuurd == strlen(str)) {
-        Serial.print(" (add) ");
-        oudeHumid = nieuwHumid;
-      } else if (wordVerstuurd == 0) {
-        Serial.print(" (won't)");
-      } else {
-        Serial.print(" (part) ");
-      }
-    
+      Serial.print(" (add) ");
+      oudeHumid = nieuwHumid;
+    } else if (wordVerstuurd == 0) {
+      Serial.print(" (won't)");
+    } else {
+      Serial.print(" (part) ");
+    }
   }
   Serial.println();
 }
+unsigned long previousMillis = 0;
+const long interval = 2000;  // 2 seconds
 
+void handleRFID() {
+  unsigned long currentMillis = millis();
+
+  // if (currentMillis - previousMillis >= interval) {
+  previousMillis = currentMillis;
+
+  int isAllowed = checkAccess();
+
+  if (isAllowed == 1) {
+    Serial.print("Mag naar binnen");
+    digitalWrite(groen, 1);
+    if (client->write("Send:12:Rfid\n")) {
+      Serial.println(" (send)");
+    } else {
+      Serial.println();
+    }
+  } else if (isAllowed == 2) {
+    Serial.println("Mag niet naar binnen");
+    digitalWrite(rood, 1);
+    if (client->write("Send:9:RfidF\n")) {
+      Serial.println(" (send)");
+    } else {
+      Serial.println();
+    }
+  }
+  // }
+}
 void loop() {
 
-  if (!client || !client->connected() ) {
+  if (!client || !client->connected()) {
     Serial.println("Client not connected");
     if (!client->connecting()) {
       client->connect(host, port);
     }
     delay(500);
-    return; 
+    return;
   }
 
-  if (!client->canSend() ) {
+  if (!client->canSend()) {
     Serial.print(".");
     delay(800);
     newline = true;
 
     return;
   }
-    if (newline) {
+  if (newline) {
     Serial.println();
     newline = false;
   }
 
-
-  int isAllowed = checkAccess();
-
-  if (isAllowed == 1) {
-    Serial.print("Mag naar binnen");
-      digitalWrite(groen, 1);
-      if (client->write("Send:12:Rfid\n")) {
-      Serial.println(" (send)");
-      return;
-
-    } else {
-      Serial.println();
-      return;
-    }
-  } else if (isAllowed == 2) {
-    Serial.println("Mag niet naar binnen");
-    digitalWrite(rood, 1);
-    if (client->write("Send:12:RfidF\n")) {
-      Serial.println(" (send)");
-      return;
-
-    } else {
-      Serial.println();
-      return;
-    }
-  }
+  handleRFID();
 
   readSensor();
 
