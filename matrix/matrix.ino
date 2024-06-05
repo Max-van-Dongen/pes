@@ -20,6 +20,8 @@
 #define MAX_DEVICES 4
 #define CS_PIN 15
 
+#define debug_signs
+
 // Create a new instance of the MD_Parola class with hardware SPI connection
 MD_Parola myDisplay = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
@@ -126,6 +128,7 @@ void setup() {
   // Set the intensity (brightness) of the display (0-15)
   myDisplay.setIntensity(10);
 
+#ifdef debug_signs
   // Clear the display
   myDisplay.displayClear();
 
@@ -133,10 +136,10 @@ void setup() {
   myDisplay.setInvert(true);
   myDisplay.print("!INIT!");
   myDisplay.setInvert(false);
+#endif
+
   delay(750);
   myDisplay.displayClear();
-  // myDisplay.displayText("Joe mamma", PA_CENTER, 100, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
-
 
   // float temp = 5;
   // while (temp <= 80) {
