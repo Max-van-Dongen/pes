@@ -110,7 +110,7 @@ int main() {
 
         std::string currentData(reinterpret_cast<char*>(data), BUFF_SIZE);
         if (data[0] != 0x00) {
-            std::cout << getCurrentTimestamp() << " - I2C DATA: " << currentData << "l: " << currentData.length() << std::endl;
+            std::cout << getCurrentTimestamp() << " - I2C DATA: " << currentData << " - L: " << currentData.length() << std::endl;
 
             lastData = currentData + '\n';
             send(clientSocket, lastData.c_str(), lastData.length(), 0);
