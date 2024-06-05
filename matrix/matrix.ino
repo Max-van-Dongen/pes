@@ -309,9 +309,12 @@ void loop() {
     char str[50] = "Send:12:Temp1\n";
     client->write(str);
     Serial.println("Temp1");
+
+#ifdef debug_signs
     myDisplay.setInvert(true);
     myDisplay.print("TEMP1");
     myDisplay.setInvert(false);
+#endif
 
     delay(250);
   }
@@ -320,9 +323,13 @@ void loop() {
     char str[50] = "Send:12:Temp0\n";
     client->write(str);
     Serial.println("Temp0");
+    
+#ifdef debug_signs
     myDisplay.setInvert(true);
     myDisplay.print("TEMP0");
     myDisplay.setInvert(false);
+#endif
+
     delay(250);
   }
   //END NOT TESTED YET
