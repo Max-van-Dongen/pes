@@ -1,9 +1,0 @@
-char
-[0] = self
-[1] = request_type  1 = n/a /  2 has some
-[2] = datatype
-[3] = value
-[4] = value
-[5] = value
-[n-1] = value
-[n] = NULL
