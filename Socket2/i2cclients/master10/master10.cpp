@@ -1,3 +1,5 @@
+/**@file*/
+
 #include <iostream>
 #include <chrono>
 #include <iomanip>
@@ -13,10 +15,15 @@
 
 #define BUFF_SIZE 16
 
+/** @brief Client ID to register with the server. */
 char clientid[] = "Client:10\n";
+/** @brief I2C device address. */
 int addr = 0x10;
 
-// Function to get current timestamp with milliseconds as a string
+/**
+ * @brief Gets the current timestamp with milliseconds as a string.
+ * @return A string representing the current timestamp.
+ */
 std::string getCurrentTimestamp() {
     auto now = std::chrono::system_clock::now();
     auto now_as_time_t = std::chrono::system_clock::to_time_t(now);
@@ -30,6 +37,11 @@ std::string getCurrentTimestamp() {
     ss << '.' << std::setfill('0') << std::setw(3) << ms << "]";
     return ss.str();
 }
+
+/**
+ * @brief Prints an error message with the current timestamp.
+ * @param message The error message to print.
+ */
 void perrorWithTimestamp(const char* message) {
   std::cerr << getCurrentTimestamp() << " - " << message << std::endl;
   perror(""); // Per standard, perror also prints to stderr

@@ -1,3 +1,4 @@
+/**@file*/
 #include <iostream>
 #include <string>
 #include <map>
@@ -13,9 +14,14 @@
 
 const int PORT = 16789;
 
-// Global map to keep track of clients
+/** @brief Global map to keep track of clients. */
 std::map<int, int> client_sockets;
 
+
+/**
+ * @brief Gets the current timestamp in the format [YYYY-MM-DD HH:MM:SS].
+ * @return A string representing the current timestamp.
+ */
 std::string getCurrentTimestamp() {
     auto now = std::chrono::system_clock::now();
     std::time_t now_c = std::chrono::system_clock::to_time_t(now);
@@ -23,6 +29,11 @@ std::string getCurrentTimestamp() {
     ss << std::put_time(std::localtime(&now_c),"[%Y-%m-%d %H:%M:%S]");
     return ss.str();
 }
+
+
+/**
+ * @brief Displays the currently connected clients.
+ */
 void display_clients() {
     std::cout << getCurrentTimestamp() << "Currently connected clients:" << std::endl;
     for (const auto& pair : client_sockets) {
@@ -30,6 +41,10 @@ void display_clients() {
     }
 }
 
+/**
+ * @brief Handles communication with a connected client.
+ * @param client_sock The socket file descriptor for the client.
+ */
 void handle_client(int client_sock) {
     // char buffer[1024];
     int clientId = -1; // Store the client ID

@@ -1,0 +1,157 @@
+\doxysection{matrix/matrix.ino File Reference}
+\hypertarget{matrix_8ino}{}\label{matrix_8ino}\index{matrix/matrix.ino@{matrix/matrix.ino}}
+{\ttfamily \#include $<$MD\+\_\+\+Parola.\+h$>$}\newline
+{\ttfamily \#include $<$MD\+\_\+\+MAX72xx.\+h$>$}\newline
+{\ttfamily \#include $<$SPI.\+h$>$}\newline
+{\ttfamily \#include "{}SHT31.\+h"{}}\newline
+{\ttfamily \#include $<$Wire.\+h$>$}\newline
+{\ttfamily \#include $<$ESP8266\+Wi\+Fi.\+h$>$}\newline
+{\ttfamily \#include $<$ESPAsync\+TCP.\+h$>$}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{matrix_8ino_a04988e7d812ffad244fd37a708b92536}{HARDWARE\+\_\+\+TYPE}}~MD\+\_\+\+MAX72\+XX\+::\+FC16\+\_\+\+HW
+\begin{DoxyCompactList}\small\item\em Includes the required Arduino libraries. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a4e132cfaa78353e3af1474a86b2dd535}\label{matrix_8ino_a4e132cfaa78353e3af1474a86b2dd535} 
+\#define {\bfseries MAX\+\_\+\+DEVICES}~4
+\begin{DoxyCompactList}\small\item\em Defines the number of devices and output pins. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_abfcf05153ddbd63d5aff5d018867cc19}\label{matrix_8ino_abfcf05153ddbd63d5aff5d018867cc19} 
+\#define {\bfseries CS\+\_\+\+PIN}~15
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{matrix_8ino_ac6c5723241f3bec580289c71c46b6802}\label{matrix_8ino_ac6c5723241f3bec580289c71c46b6802} 
+SHT31 {\bfseries sht} (0x44)
+\begin{DoxyCompactList}\small\item\em SHT31 sensor object initialized with I2C address 0x44. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a4fc01d736fe50cf5b977f755b675f11d}\label{matrix_8ino_a4fc01d736fe50cf5b977f755b675f11d} 
+void {\bfseries setup} ()
+\begin{DoxyCompactList}\small\item\em Sets up the Wi\+Fi connection, initializes the client, and configures the display. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{matrix_8ino_a3d6929e998342cbd7bf48725d0501d2e}{display\+Fire}} (int state)
+\begin{DoxyCompactList}\small\item\em Displays a fire warning on the LED matrix display. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{matrix_8ino_a2ff382f8e82488ff6a214afa7212dc9a}{process\+Received\+String}} (String input)
+\begin{DoxyCompactList}\small\item\em Processes the received string and updates temperature or humidity values. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{matrix_8ino_abd934e40497139c830f06855bb3170c7}{display\+Temp}} (float \mbox{\hyperlink{matrix_8ino_ad81826e41a00a339d9cf512ede8346f9}{temperature\+Outside}})
+\begin{DoxyCompactList}\small\item\em Displays the temperature on the LED matrix display. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a540664b2b5f0c7c04b0029e5dabc2a6a}\label{matrix_8ino_a540664b2b5f0c7c04b0029e5dabc2a6a} 
+void {\bfseries read\+Sensor} ()
+\begin{DoxyCompactList}\small\item\em Reads the sensor data and sends it if there is a significant change. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_afe461d27b9c48d5921c00d521181f12f}\label{matrix_8ino_afe461d27b9c48d5921c00d521181f12f} 
+void {\bfseries loop} ()
+\begin{DoxyCompactList}\small\item\em Main loop that continuously checks the client\textquotesingle{}s connection status, reads sensor data, and updates the display. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{matrix_8ino_a58fb85b6660ec42a9292186395a0e69b}\label{matrix_8ino_a58fb85b6660ec42a9292186395a0e69b} 
+MD\+\_\+\+Parola {\bfseries my\+Display} = MD\+\_\+\+Parola(\mbox{\hyperlink{matrix_8ino_a04988e7d812ffad244fd37a708b92536}{HARDWARE\+\_\+\+TYPE}}, CS\+\_\+\+PIN, \mbox{\hyperlink{matrix_8ino_a4e132cfaa78353e3af1474a86b2dd535}{MAX\+\_\+\+DEVICES}})
+\begin{DoxyCompactList}\small\item\em Creates a new instance of the MD\+\_\+\+Parola class with hardware SPI connection. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a587ba0cb07f02913598610049a3bbb79}\label{matrix_8ino_a587ba0cb07f02913598610049a3bbb79} 
+const char \texorpdfstring{$\ast$}{*} {\bfseries ssid} = "{}coldspot"{}
+\begin{DoxyCompactList}\small\item\em Wi\+Fi network SSID. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_aa4a2ebcb494493f648ae1e6975672575}\label{matrix_8ino_aa4a2ebcb494493f648ae1e6975672575} 
+const char \texorpdfstring{$\ast$}{*} {\bfseries password} = "{}123456781"{}
+\begin{DoxyCompactList}\small\item\em Wi\+Fi network password. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_ae032e164f1daa754d6fbb79d59723931}\label{matrix_8ino_ae032e164f1daa754d6fbb79d59723931} 
+const char \texorpdfstring{$\ast$}{*} {\bfseries host} = "{}10.\+0.\+0.\+3"{}
+\begin{DoxyCompactList}\small\item\em Server host address. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a9260eac9ee1e7cf63ebe92eb4baf1293}\label{matrix_8ino_a9260eac9ee1e7cf63ebe92eb4baf1293} 
+const uint16\+\_\+t {\bfseries port} = 16789
+\begin{DoxyCompactList}\small\item\em Server port number. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a0b651419bd41e7fe37a24cdef6646e33}\label{matrix_8ino_a0b651419bd41e7fe37a24cdef6646e33} 
+bool {\bfseries big\+Diff} = false
+\begin{DoxyCompactList}\small\item\em Flag indicating a significant temperature difference. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a9c6eedd7da41b83e07aacb1526e7b0ee}\label{matrix_8ino_a9c6eedd7da41b83e07aacb1526e7b0ee} 
+Async\+Client \texorpdfstring{$\ast$}{*} {\bfseries client} = nullptr
+\begin{DoxyCompactList}\small\item\em Pointer to the asynchronous client. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_ad81826e41a00a339d9cf512ede8346f9}\label{matrix_8ino_ad81826e41a00a339d9cf512ede8346f9} 
+float {\bfseries temperature\+Outside} = 0.\+0
+\begin{DoxyCompactList}\small\item\em Temperature outside the sensor location. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a2c1b813d61ca45d7215b3ca363618cf7}\label{matrix_8ino_a2c1b813d61ca45d7215b3ca363618cf7} 
+float {\bfseries temperature\+Inside} = 0.\+0
+\begin{DoxyCompactList}\small\item\em Temperature inside the sensor location. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a1faa25cbe6eb70c607cb3cb91f09fef7}\label{matrix_8ino_a1faa25cbe6eb70c607cb3cb91f09fef7} 
+float {\bfseries humidity\+Inside} = 0.\+0
+\begin{DoxyCompactList}\small\item\em Humidity inside the sensor location. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a86027ad9c9159f02624d136fb63364fe}\label{matrix_8ino_a86027ad9c9159f02624d136fb63364fe} 
+unsigned long {\bfseries previous\+Millis} = 0
+\begin{DoxyCompactList}\small\item\em Stores the previous time for sensor reading interval. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_afab23e0ee85e56261dace1dba900e39e}\label{matrix_8ino_afab23e0ee85e56261dace1dba900e39e} 
+const long {\bfseries interval} = 200
+\begin{DoxyCompactList}\small\item\em Interval for sensor reading in milliseconds. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_aaaa8780adea17d6f603d9a319efd9fe1}\label{matrix_8ino_aaaa8780adea17d6f603d9a319efd9fe1} 
+int {\bfseries temp\+Duration} = 10000
+\begin{DoxyCompactList}\small\item\em Duration to display temperature in milliseconds. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_ad7708c8bd2c5883288b5ff436cb7248b}\label{matrix_8ino_ad7708c8bd2c5883288b5ff436cb7248b} 
+bool {\bfseries show\+Temp} = true
+\begin{DoxyCompactList}\small\item\em Flag to indicate whether to show temperature or humidity. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a63b9f34d65d3cd35c23a6d11acb091e9}\label{matrix_8ino_a63b9f34d65d3cd35c23a6d11acb091e9} 
+float {\bfseries oude\+Temp\+Inside} = 0.\+0
+\begin{DoxyCompactList}\small\item\em Previous temperature inside the sensor location. \end{DoxyCompactList}\item 
+\Hypertarget{matrix_8ino_a1400a49a36c948c48ddda8b1d20c27c2}\label{matrix_8ino_a1400a49a36c948c48ddda8b1d20c27c2} 
+float {\bfseries oude\+Humid\+Inside} = 0.\+0
+\begin{DoxyCompactList}\small\item\em Previous humidity inside the sensor location. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{matrix_8ino_a04988e7d812ffad244fd37a708b92536}\index{matrix.ino@{matrix.ino}!HARDWARE\_TYPE@{HARDWARE\_TYPE}}
+\index{HARDWARE\_TYPE@{HARDWARE\_TYPE}!matrix.ino@{matrix.ino}}
+\doxysubsubsection{\texorpdfstring{HARDWARE\_TYPE}{HARDWARE\_TYPE}}
+{\footnotesize\ttfamily \label{matrix_8ino_a04988e7d812ffad244fd37a708b92536} 
+\#define HARDWARE\+\_\+\+TYPE~MD\+\_\+\+MAX72\+XX\+::\+FC16\+\_\+\+HW}
+
+
+
+Includes the required Arduino libraries. 
+
+Includes the ESP8266 Wi\+Fi library.
+
+Includes the ESPAsync\+TCP library.
+
+Defines the hardware type for MD\+\_\+\+MAX72\+XX library. 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{matrix_8ino_a3d6929e998342cbd7bf48725d0501d2e}\index{matrix.ino@{matrix.ino}!displayFire@{displayFire}}
+\index{displayFire@{displayFire}!matrix.ino@{matrix.ino}}
+\doxysubsubsection{\texorpdfstring{displayFire()}{displayFire()}}
+{\footnotesize\ttfamily \label{matrix_8ino_a3d6929e998342cbd7bf48725d0501d2e} 
+void display\+Fire (\begin{DoxyParamCaption}\item[{int}]{state}{}\end{DoxyParamCaption})}
+
+
+
+Displays a fire warning on the LED matrix display. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em state} & The state to determine if the fire warning should be displayed. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{matrix_8ino_abd934e40497139c830f06855bb3170c7}\index{matrix.ino@{matrix.ino}!displayTemp@{displayTemp}}
+\index{displayTemp@{displayTemp}!matrix.ino@{matrix.ino}}
+\doxysubsubsection{\texorpdfstring{displayTemp()}{displayTemp()}}
+{\footnotesize\ttfamily \label{matrix_8ino_abd934e40497139c830f06855bb3170c7} 
+void display\+Temp (\begin{DoxyParamCaption}\item[{float}]{temperature\+Outside}{}\end{DoxyParamCaption})}
+
+
+
+Displays the temperature on the LED matrix display. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em temperature\+Outside} & The temperature to display. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{matrix_8ino_a2ff382f8e82488ff6a214afa7212dc9a}\index{matrix.ino@{matrix.ino}!processReceivedString@{processReceivedString}}
+\index{processReceivedString@{processReceivedString}!matrix.ino@{matrix.ino}}
+\doxysubsubsection{\texorpdfstring{processReceivedString()}{processReceivedString()}}
+{\footnotesize\ttfamily \label{matrix_8ino_a2ff382f8e82488ff6a214afa7212dc9a} 
+void process\+Received\+String (\begin{DoxyParamCaption}\item[{String}]{input}{}\end{DoxyParamCaption})}
+
+
+
+Processes the received string and updates temperature or humidity values. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & The received string input. \\
+\hline
+\end{DoxyParams}

@@ -1,0 +1,72 @@
+\doxysection{Buzzer\+We\+Mos/\+Buzzer\+We\+Mos.ino File Reference}
+\hypertarget{_buzzer_we_mos_8ino}{}\label{_buzzer_we_mos_8ino}\index{BuzzerWeMos/BuzzerWeMos.ino@{BuzzerWeMos/BuzzerWeMos.ino}}
+{\ttfamily \#include $<$Buzzer.\+h$>$}\newline
+{\ttfamily \#include $<$ESP8266\+Wi\+Fi.\+h$>$}\newline
+{\ttfamily \#include $<$ESPAsync\+TCP.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{_buzzer_we_mos_8ino_ad0fb08e2bc4a40e07c2e96487f8d2682}\label{_buzzer_we_mos_8ino_ad0fb08e2bc4a40e07c2e96487f8d2682} 
+Buzzer {\bfseries buzzer} (14)
+\begin{DoxyCompactList}\small\item\em Buzzer object initialized on pin 14. \end{DoxyCompactList}\item 
+\Hypertarget{_buzzer_we_mos_8ino_a4fc01d736fe50cf5b977f755b675f11d}\label{_buzzer_we_mos_8ino_a4fc01d736fe50cf5b977f755b675f11d} 
+void {\bfseries setup} ()
+\begin{DoxyCompactList}\small\item\em Sets up the Wi\+Fi connection, initializes the client and defines event handlers. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_buzzer_we_mos_8ino_a2ff382f8e82488ff6a214afa7212dc9a}{process\+Received\+String}} (String input)
+\begin{DoxyCompactList}\small\item\em Processes the received string and triggers buzzer sounds based on specific keywords. \end{DoxyCompactList}\item 
+\Hypertarget{_buzzer_we_mos_8ino_afe461d27b9c48d5921c00d521181f12f}\label{_buzzer_we_mos_8ino_afe461d27b9c48d5921c00d521181f12f} 
+void {\bfseries loop} ()
+\begin{DoxyCompactList}\small\item\em Main loop that continuously checks the client\textquotesingle{}s connection status and attempts reconnection if necessary. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{_buzzer_we_mos_8ino_a587ba0cb07f02913598610049a3bbb79}{ssid}} = "{}coldspot"{}
+\begin{DoxyCompactList}\small\item\em Includes the Buzzer library. \end{DoxyCompactList}\item 
+\Hypertarget{_buzzer_we_mos_8ino_aa4a2ebcb494493f648ae1e6975672575}\label{_buzzer_we_mos_8ino_aa4a2ebcb494493f648ae1e6975672575} 
+const char \texorpdfstring{$\ast$}{*} {\bfseries password} = "{}123456781"{}
+\begin{DoxyCompactList}\small\item\em Wi\+Fi network password. \end{DoxyCompactList}\item 
+\Hypertarget{_buzzer_we_mos_8ino_ae032e164f1daa754d6fbb79d59723931}\label{_buzzer_we_mos_8ino_ae032e164f1daa754d6fbb79d59723931} 
+const char \texorpdfstring{$\ast$}{*} {\bfseries host} = "{}192.\+168.\+156.\+130"{}
+\begin{DoxyCompactList}\small\item\em Server host address. \end{DoxyCompactList}\item 
+\Hypertarget{_buzzer_we_mos_8ino_a9260eac9ee1e7cf63ebe92eb4baf1293}\label{_buzzer_we_mos_8ino_a9260eac9ee1e7cf63ebe92eb4baf1293} 
+const uint16\+\_\+t {\bfseries port} = 16789
+\begin{DoxyCompactList}\small\item\em Server port number. \end{DoxyCompactList}\item 
+\Hypertarget{_buzzer_we_mos_8ino_a9c6eedd7da41b83e07aacb1526e7b0ee}\label{_buzzer_we_mos_8ino_a9c6eedd7da41b83e07aacb1526e7b0ee} 
+Async\+Client \texorpdfstring{$\ast$}{*} {\bfseries client} = nullptr
+\begin{DoxyCompactList}\small\item\em Pointer to the asynchronous client. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{_buzzer_we_mos_8ino_a2ff382f8e82488ff6a214afa7212dc9a}\index{BuzzerWeMos.ino@{BuzzerWeMos.ino}!processReceivedString@{processReceivedString}}
+\index{processReceivedString@{processReceivedString}!BuzzerWeMos.ino@{BuzzerWeMos.ino}}
+\doxysubsubsection{\texorpdfstring{processReceivedString()}{processReceivedString()}}
+{\footnotesize\ttfamily \label{_buzzer_we_mos_8ino_a2ff382f8e82488ff6a214afa7212dc9a} 
+void process\+Received\+String (\begin{DoxyParamCaption}\item[{String}]{input}{}\end{DoxyParamCaption})}
+
+
+
+Processes the received string and triggers buzzer sounds based on specific keywords. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & The received string input. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{_buzzer_we_mos_8ino_a587ba0cb07f02913598610049a3bbb79}\index{BuzzerWeMos.ino@{BuzzerWeMos.ino}!ssid@{ssid}}
+\index{ssid@{ssid}!BuzzerWeMos.ino@{BuzzerWeMos.ino}}
+\doxysubsubsection{\texorpdfstring{ssid}{ssid}}
+{\footnotesize\ttfamily \label{_buzzer_we_mos_8ino_a587ba0cb07f02913598610049a3bbb79} 
+const char\texorpdfstring{$\ast$}{*} ssid = "{}coldspot"{}}
+
+
+
+Includes the Buzzer library. 
+
+Includes the ESP8266 Wi\+Fi library.
+
+Includes the ESPAsync\+TCP library.
+
+Wi\+Fi network SSID. 

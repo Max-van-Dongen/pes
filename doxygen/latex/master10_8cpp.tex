@@ -1,0 +1,70 @@
+\doxysection{Socket2/i2cclients/master10/master10.cpp File Reference}
+\hypertarget{master10_8cpp}{}\label{master10_8cpp}\index{Socket2/i2cclients/master10/master10.cpp@{Socket2/i2cclients/master10/master10.cpp}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$chrono$>$}\newline
+{\ttfamily \#include $<$iomanip$>$}\newline
+{\ttfamily \#include $<$ctime$>$}\newline
+{\ttfamily \#include $<$cstring$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$sys/socket.\+h$>$}\newline
+{\ttfamily \#include $<$arpa/inet.\+h$>$}\newline
+{\ttfamily \#include $<$linux/i2c-\/dev.\+h$>$}\newline
+{\ttfamily \#include $<$sys/ioctl.\+h$>$}\newline
+{\ttfamily \#include $<$fcntl.\+h$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{master10_8cpp_a6c7cd32e1bac137f05e4a752b4ad10af}\label{master10_8cpp_a6c7cd32e1bac137f05e4a752b4ad10af} 
+\#define {\bfseries BUFF\+\_\+\+SIZE}~16
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{master10_8cpp_a96df0851c9cd89da0191e6457b0de548}{get\+Current\+Timestamp}} ()
+\begin{DoxyCompactList}\small\item\em Gets the current timestamp with milliseconds as a string. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{master10_8cpp_a8d70e2066e6d8ac058cc6d2d7a01ebe6}{perror\+With\+Timestamp}} (const char \texorpdfstring{$\ast$}{*}message)
+\begin{DoxyCompactList}\small\item\em Prints an error message with the current timestamp. \end{DoxyCompactList}\item 
+\Hypertarget{master10_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}\label{master10_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4} 
+int {\bfseries main} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{master10_8cpp_a05a1d2d942b9865352afb3d01166a654}\label{master10_8cpp_a05a1d2d942b9865352afb3d01166a654} 
+char {\bfseries clientid} \mbox{[}$\,$\mbox{]} = "{}Client\+:10\textbackslash{}n"{}
+\begin{DoxyCompactList}\small\item\em Client ID to register with the server. \end{DoxyCompactList}\item 
+\Hypertarget{master10_8cpp_aafb8164f20f79a2dd0290502a25367d1}\label{master10_8cpp_aafb8164f20f79a2dd0290502a25367d1} 
+int {\bfseries addr} = 0x10
+\begin{DoxyCompactList}\small\item\em I2C device address. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{master10_8cpp_a96df0851c9cd89da0191e6457b0de548}\index{master10.cpp@{master10.cpp}!getCurrentTimestamp@{getCurrentTimestamp}}
+\index{getCurrentTimestamp@{getCurrentTimestamp}!master10.cpp@{master10.cpp}}
+\doxysubsubsection{\texorpdfstring{getCurrentTimestamp()}{getCurrentTimestamp()}}
+{\footnotesize\ttfamily \label{master10_8cpp_a96df0851c9cd89da0191e6457b0de548} 
+std\+::string get\+Current\+Timestamp (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Gets the current timestamp with milliseconds as a string. 
+
+\begin{DoxyReturn}{Returns}
+A string representing the current timestamp. 
+\end{DoxyReturn}
+\Hypertarget{master10_8cpp_a8d70e2066e6d8ac058cc6d2d7a01ebe6}\index{master10.cpp@{master10.cpp}!perrorWithTimestamp@{perrorWithTimestamp}}
+\index{perrorWithTimestamp@{perrorWithTimestamp}!master10.cpp@{master10.cpp}}
+\doxysubsubsection{\texorpdfstring{perrorWithTimestamp()}{perrorWithTimestamp()}}
+{\footnotesize\ttfamily \label{master10_8cpp_a8d70e2066e6d8ac058cc6d2d7a01ebe6} 
+void perror\+With\+Timestamp (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{message}{}\end{DoxyParamCaption})}
+
+
+
+Prints an error message with the current timestamp. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em message} & The error message to print. \\
+\hline
+\end{DoxyParams}

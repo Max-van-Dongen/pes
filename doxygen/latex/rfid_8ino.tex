@@ -1,0 +1,132 @@
+\doxysection{rfid/rfid.ino File Reference}
+\hypertarget{rfid_8ino}{}\label{rfid_8ino}\index{rfid/rfid.ino@{rfid/rfid.ino}}
+{\ttfamily \#include $<$ESP8266\+Wi\+Fi.\+h$>$}\newline
+{\ttfamily \#include $<$SPI.\+h$>$}\newline
+{\ttfamily \#include $<$MFRC522.\+h$>$}\newline
+{\ttfamily \#include $<$Wire.\+h$>$}\newline
+{\ttfamily \#include "{}SHT31.\+h"{}}\newline
+{\ttfamily \#include $<$ESPAsync\+TCP.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{rfid_8ino_ac672f817299d07cc428fe3f456235273}\label{rfid_8ino_ac672f817299d07cc428fe3f456235273} 
+MFRC522 {\bfseries mfrc522} (\mbox{\hyperlink{rfid_8ino_ad5797c99afb90efb75397bb8d7e5dfbb}{SS\+\_\+\+PIN}}, \mbox{\hyperlink{rfid_8ino_a78db906d34f9f33a7c5a6f4851c96983}{RST\+\_\+\+PIN}})
+\begin{DoxyCompactList}\small\item\em MFRC522 RFID reader object. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_ac6c5723241f3bec580289c71c46b6802}\label{rfid_8ino_ac6c5723241f3bec580289c71c46b6802} 
+SHT31 {\bfseries sht} (0x44)
+\begin{DoxyCompactList}\small\item\em SHT31 temperature and humidity sensor object. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a4fc01d736fe50cf5b977f755b675f11d}\label{rfid_8ino_a4fc01d736fe50cf5b977f755b675f11d} 
+void {\bfseries setup} ()
+\begin{DoxyCompactList}\small\item\em Initializes the system, sets up Wi\+Fi, and connects to the server. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{rfid_8ino_af615da00465ab26f4bbef7f8ee03e698}{check\+Access}} ()
+\begin{DoxyCompactList}\small\item\em Checks access by reading the RFID card. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a540664b2b5f0c7c04b0029e5dabc2a6a}\label{rfid_8ino_a540664b2b5f0c7c04b0029e5dabc2a6a} 
+void {\bfseries read\+Sensor} ()
+\begin{DoxyCompactList}\small\item\em Reads temperature and humidity from the sensor and sends the data to the server if significant changes are detected. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_aee754d5a9a7adc964e2458c556d31728}\label{rfid_8ino_aee754d5a9a7adc964e2458c556d31728} 
+void {\bfseries handle\+RFID} ()
+\begin{DoxyCompactList}\small\item\em Handles RFID access control, checking the card and sending the access status to the server. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_afe461d27b9c48d5921c00d521181f12f}\label{rfid_8ino_afe461d27b9c48d5921c00d521181f12f} 
+void {\bfseries loop} ()
+\begin{DoxyCompactList}\small\item\em Main loop that checks client connection, handles RFID and sensor data, and sends data to the server if available. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{rfid_8ino_a58bfcaf707e4863a09a15ca2a11d33e5}{dump\+\_\+byte\+\_\+array}} (byte \texorpdfstring{$\ast$}{*}buffer, byte buffer\+Size)
+\begin{DoxyCompactList}\small\item\em Helper routine to dump a byte array as hex values to Serial. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+constexpr uint8\+\_\+t \mbox{\hyperlink{rfid_8ino_a78db906d34f9f33a7c5a6f4851c96983}{RST\+\_\+\+PIN}} = 0
+\begin{DoxyCompactList}\small\item\em Pin configuration for the RFID and sensor modules. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_ad5797c99afb90efb75397bb8d7e5dfbb}\label{rfid_8ino_ad5797c99afb90efb75397bb8d7e5dfbb} 
+constexpr uint8\+\_\+t {\bfseries SS\+\_\+\+PIN} = 15
+\begin{DoxyCompactList}\small\item\em RFID slave select pin. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a0e53d92cadd57d7960a6c5619f2f439c}\label{rfid_8ino_a0e53d92cadd57d7960a6c5619f2f439c} 
+const int {\bfseries groen} = 16
+\begin{DoxyCompactList}\small\item\em Green LED pin. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_aed6e263facf85916d45a34afc3c2e978}\label{rfid_8ino_aed6e263facf85916d45a34afc3c2e978} 
+const int {\bfseries rood} = 1
+\begin{DoxyCompactList}\small\item\em Red LED pin. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_ac1a0b0bc43fc961fca46b36695489f0e}\label{rfid_8ino_ac1a0b0bc43fc961fca46b36695489f0e} 
+bool {\bfseries has\+Data} = false
+\begin{DoxyCompactList}\small\item\em Flag indicating if there is data to be sent. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a5e1a07804adbb8144b32aa8415d229a5}\label{rfid_8ino_a5e1a07804adbb8144b32aa8415d229a5} 
+bool {\bfseries newline} = false
+\begin{DoxyCompactList}\small\item\em Flag indicating if a new line is needed in Serial output. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a6807224186077d61c7401e5d4c49e1b2}\label{rfid_8ino_a6807224186077d61c7401e5d4c49e1b2} 
+const byte {\bfseries my\+Card\+UID} \mbox{[}4\mbox{]} = \{ 0x\+B1, 0x\+FF, 0x74, 0x1D \}
+\begin{DoxyCompactList}\small\item\em Predefined UID for a specific RFID card. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a587ba0cb07f02913598610049a3bbb79}\label{rfid_8ino_a587ba0cb07f02913598610049a3bbb79} 
+const char \texorpdfstring{$\ast$}{*} {\bfseries ssid} = "{}coldspot"{}
+\begin{DoxyCompactList}\small\item\em Wi\+Fi network SSID. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_aa4a2ebcb494493f648ae1e6975672575}\label{rfid_8ino_aa4a2ebcb494493f648ae1e6975672575} 
+const char \texorpdfstring{$\ast$}{*} {\bfseries password} = "{}123456781"{}
+\begin{DoxyCompactList}\small\item\em Wi\+Fi network password. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_ae032e164f1daa754d6fbb79d59723931}\label{rfid_8ino_ae032e164f1daa754d6fbb79d59723931} 
+const char \texorpdfstring{$\ast$}{*} {\bfseries host} = "{}10.\+0.\+0.\+3"{}
+\begin{DoxyCompactList}\small\item\em Server host address. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a9260eac9ee1e7cf63ebe92eb4baf1293}\label{rfid_8ino_a9260eac9ee1e7cf63ebe92eb4baf1293} 
+const uint16\+\_\+t {\bfseries port} = 16789
+\begin{DoxyCompactList}\small\item\em Server port number. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a9c6eedd7da41b83e07aacb1526e7b0ee}\label{rfid_8ino_a9c6eedd7da41b83e07aacb1526e7b0ee} 
+Async\+Client \texorpdfstring{$\ast$}{*} {\bfseries client} = nullptr
+\begin{DoxyCompactList}\small\item\em Pointer to the asynchronous client. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a826b102d0038cd2d830cbb4a540653cf}\label{rfid_8ino_a826b102d0038cd2d830cbb4a540653cf} 
+float {\bfseries oude\+Temp} = 0.\+0
+\begin{DoxyCompactList}\small\item\em Previous temperature reading. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a2c89e5f31fdff90d7a2dadb6d275156c}\label{rfid_8ino_a2c89e5f31fdff90d7a2dadb6d275156c} 
+float {\bfseries oude\+Humid} = 0.\+0
+\begin{DoxyCompactList}\small\item\em Previous humidity reading. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_a86027ad9c9159f02624d136fb63364fe}\label{rfid_8ino_a86027ad9c9159f02624d136fb63364fe} 
+unsigned long {\bfseries previous\+Millis} = 0
+\begin{DoxyCompactList}\small\item\em Stores the previous time a check was performed. \end{DoxyCompactList}\item 
+\Hypertarget{rfid_8ino_afab23e0ee85e56261dace1dba900e39e}\label{rfid_8ino_afab23e0ee85e56261dace1dba900e39e} 
+const long {\bfseries interval} = 2000
+\begin{DoxyCompactList}\small\item\em Interval for performing periodic checks (in milliseconds). \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{rfid_8ino_af615da00465ab26f4bbef7f8ee03e698}\index{rfid.ino@{rfid.ino}!checkAccess@{checkAccess}}
+\index{checkAccess@{checkAccess}!rfid.ino@{rfid.ino}}
+\doxysubsubsection{\texorpdfstring{checkAccess()}{checkAccess()}}
+{\footnotesize\ttfamily \label{rfid_8ino_af615da00465ab26f4bbef7f8ee03e698} 
+int check\+Access (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Checks access by reading the RFID card. 
+
+\begin{DoxyReturn}{Returns}
+Access status\+: 0 = no card detected, 1 = access allowed, 2 = access denied. 
+\end{DoxyReturn}
+\Hypertarget{rfid_8ino_a58bfcaf707e4863a09a15ca2a11d33e5}\index{rfid.ino@{rfid.ino}!dump\_byte\_array@{dump\_byte\_array}}
+\index{dump\_byte\_array@{dump\_byte\_array}!rfid.ino@{rfid.ino}}
+\doxysubsubsection{\texorpdfstring{dump\_byte\_array()}{dump\_byte\_array()}}
+{\footnotesize\ttfamily \label{rfid_8ino_a58bfcaf707e4863a09a15ca2a11d33e5} 
+void dump\+\_\+byte\+\_\+array (\begin{DoxyParamCaption}\item[{byte \texorpdfstring{$\ast$}{*}}]{buffer}{, }\item[{byte}]{buffer\+Size}{}\end{DoxyParamCaption})}
+
+
+
+Helper routine to dump a byte array as hex values to Serial. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to the byte array. \\
+\hline
+{\em buffer\+Size} & Size of the byte array. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{rfid_8ino_a78db906d34f9f33a7c5a6f4851c96983}\index{rfid.ino@{rfid.ino}!RST\_PIN@{RST\_PIN}}
+\index{RST\_PIN@{RST\_PIN}!rfid.ino@{rfid.ino}}
+\doxysubsubsection{\texorpdfstring{RST\_PIN}{RST\_PIN}}
+{\footnotesize\ttfamily \label{rfid_8ino_a78db906d34f9f33a7c5a6f4851c96983} 
+uint8\+\_\+t RST\+\_\+\+PIN = 0\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+
+
+Pin configuration for the RFID and sensor modules. 
+
+RST -\/ D3 MISO -\/ D6 MOSI -\/ D7 SCK -\/ D5 SDA -\/ D8
+
+RFID reset pin. 

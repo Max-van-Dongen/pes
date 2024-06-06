@@ -1,0 +1,67 @@
+\doxysection{Socket2/socketserver/server.cpp File Reference}
+\hypertarget{server_8cpp}{}\label{server_8cpp}\index{Socket2/socketserver/server.cpp@{Socket2/socketserver/server.cpp}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$map$>$}\newline
+{\ttfamily \#include $<$cstring$>$}\newline
+{\ttfamily \#include $<$thread$>$}\newline
+{\ttfamily \#include $<$sys/socket.\+h$>$}\newline
+{\ttfamily \#include $<$netinet/in.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$chrono$>$}\newline
+{\ttfamily \#include $<$iomanip$>$}\newline
+{\ttfamily \#include $<$ctime$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{server_8cpp_a96df0851c9cd89da0191e6457b0de548}{get\+Current\+Timestamp}} ()
+\begin{DoxyCompactList}\small\item\em Gets the current timestamp in the format \mbox{[}YYYY-\/\+MM-\/\+DD HH\+:\+MM\+:SS\mbox{]}. \end{DoxyCompactList}\item 
+\Hypertarget{server_8cpp_a0751559861e533125564af145656cf07}\label{server_8cpp_a0751559861e533125564af145656cf07} 
+void {\bfseries display\+\_\+clients} ()
+\begin{DoxyCompactList}\small\item\em Displays the currently connected clients. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{server_8cpp_ae0fea874f6feca876023c17a7074f3b9}{handle\+\_\+client}} (int client\+\_\+sock)
+\begin{DoxyCompactList}\small\item\em Handles communication with a connected client. \end{DoxyCompactList}\item 
+\Hypertarget{server_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}\label{server_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4} 
+int {\bfseries main} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{server_8cpp_a11717c934f77ad5167dac5d28562d85a}\label{server_8cpp_a11717c934f77ad5167dac5d28562d85a} 
+const int {\bfseries PORT} = 16789
+\item 
+\Hypertarget{server_8cpp_a6eefe2431b0990077bc93e4284ce4aaa}\label{server_8cpp_a6eefe2431b0990077bc93e4284ce4aaa} 
+std\+::map$<$ int, int $>$ {\bfseries client\+\_\+sockets}
+\begin{DoxyCompactList}\small\item\em Global map to keep track of clients. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{server_8cpp_a96df0851c9cd89da0191e6457b0de548}\index{server.cpp@{server.cpp}!getCurrentTimestamp@{getCurrentTimestamp}}
+\index{getCurrentTimestamp@{getCurrentTimestamp}!server.cpp@{server.cpp}}
+\doxysubsubsection{\texorpdfstring{getCurrentTimestamp()}{getCurrentTimestamp()}}
+{\footnotesize\ttfamily \label{server_8cpp_a96df0851c9cd89da0191e6457b0de548} 
+std\+::string get\+Current\+Timestamp (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Gets the current timestamp in the format \mbox{[}YYYY-\/\+MM-\/\+DD HH\+:\+MM\+:SS\mbox{]}. 
+
+\begin{DoxyReturn}{Returns}
+A string representing the current timestamp. 
+\end{DoxyReturn}
+\Hypertarget{server_8cpp_ae0fea874f6feca876023c17a7074f3b9}\index{server.cpp@{server.cpp}!handle\_client@{handle\_client}}
+\index{handle\_client@{handle\_client}!server.cpp@{server.cpp}}
+\doxysubsubsection{\texorpdfstring{handle\_client()}{handle\_client()}}
+{\footnotesize\ttfamily \label{server_8cpp_ae0fea874f6feca876023c17a7074f3b9} 
+void handle\+\_\+client (\begin{DoxyParamCaption}\item[{int}]{client\+\_\+sock}{}\end{DoxyParamCaption})}
+
+
+
+Handles communication with a connected client. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em client\+\_\+sock} & The socket file descriptor for the client. \\
+\hline
+\end{DoxyParams}
