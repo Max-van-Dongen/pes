@@ -1,20 +1,53 @@
-//Id 9
+/**@file*/
+
+/**
+ * @brief Includes the Buzzer library.
+ */
 #include <Buzzer.h>
 
+/**
+ * @brief Includes the ESP8266 WiFi library.
+ */
 #include <ESP8266WiFi.h>
+
+/**
+ * @brief Includes the ESPAsyncTCP library.
+ */
 #include <ESPAsyncTCP.h>
 
-
-
+/**
+ * @brief WiFi network SSID.
+ */
 const char* ssid = "coldspot";
+
+/**
+ * @brief WiFi network password.
+ */
 const char* password = "123456781";
+
+/**
+ * @brief Server host address.
+ */
 const char* host = "192.168.156.130";
+
+/**
+ * @brief Server port number.
+ */
 const uint16_t port = 16789;
 
+/**
+ * @brief Pointer to the asynchronous client.
+ */
 AsyncClient* client = nullptr;
 
+/**
+ * @brief Buzzer object initialized on pin 14.
+ */
 Buzzer buzzer(14);
 
+/**
+ * @brief Sets up the WiFi connection, initializes the client and defines event handlers.
+ */
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -67,11 +100,14 @@ void setup() {
   },
                  nullptr);
 
-
   // Connect to the server
   client->connect(host, port);
 }
 
+/**
+ * @brief Processes the received string and triggers buzzer sounds based on specific keywords.
+ * @param input The received string input.
+ */
 void processReceivedString(String input) {
   int belIndex = input.indexOf("Bel");
   int rfidIndex = input.indexOf("RfidF");
@@ -86,9 +122,11 @@ void processReceivedString(String input) {
       buzzer.sound(1500, 500);
       buzzer.sound(600, 250);
   }
-
 }
 
+/**
+ * @brief Main loop that continuously checks the client's connection status and attempts reconnection if necessary.
+ */
 void loop() {
   // put your main code here, to run repeatedly:
   

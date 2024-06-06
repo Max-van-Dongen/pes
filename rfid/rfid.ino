@@ -1,10 +1,14 @@
+/**@file*/
+
 /**
-RST  - D3
-MISO - D6
-MOSI - D7
-SCK  - D5
-SDA  - D8
-*/
+ * @brief Pin configuration for the RFID and sensor modules.
+ * 
+ * RST  - D3
+ * MISO - D6
+ * MOSI - D7
+ * SCK  - D5
+ * SDA  - D8
+ */
 #include <ESP8266WiFi.h>
 #include <SPI.h>
 #include <MFRC522.h>
@@ -12,27 +16,99 @@ SDA  - D8
 #include "SHT31.h"
 #include <ESPAsyncTCP.h>
 
+/**
+ * @brief RFID reset pin.
+ */
 constexpr uint8_t RST_PIN = 0;
+
+/**
+ * @brief RFID slave select pin.
+ */
 constexpr uint8_t SS_PIN = 15;
+
+/**
+ * @brief Green LED pin.
+ */
 const int groen = 16;
+
+/**
+ * @brief Red LED pin.
+ */
 const int rood = 1;
+
+/**
+ * @brief Flag indicating if there is data to be sent.
+ */
 bool hasData = false;
 
+/**
+ * @brief Flag indicating if a new line is needed in Serial output.
+ */
 bool newline = false;
 
+/**
+ * @brief MFRC522 RFID reader object.
+ */
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+
+/**
+ * @brief Predefined UID for a specific RFID card.
+ */
 const byte myCardUID[4] = { 0xB1, 0xFF, 0x74, 0x1D };
 
+/**
+ * @brief WiFi network SSID.
+ */
 const char* ssid = "coldspot";
-const char* password = "123456781";
-const char* host = "10.0.0.3";
-const uint16_t port = 16789;
-//const char clientId = 'b';
 
+/**
+ * @brief WiFi network password.
+ */
+const char* password = "123456781";
+
+/**
+ * @brief Server host address.
+ */
+const char* host = "10.0.0.3";
+
+/**
+ * @brief Server port number.
+ */
+const uint16_t port = 16789;
+
+/**
+ * @brief Pointer to the asynchronous client.
+ */
 AsyncClient* client = nullptr;
 
+/**
+ * @brief SHT31 temperature and humidity sensor object.
+ */
 SHT31 sht(0x44);
 
+/**
+ * @brief Previous temperature reading.
+ */
+float oudeTemp = 0.0;
+
+/**
+ * @brief Previous humidity reading.
+ */
+float oudeHumid = 0.0;
+
+/**
+ * @brief Stores the previous time a check was performed.
+ */
+unsigned long previousMillis = 0;
+
+/**
+ * @brief Interval for performing periodic checks (in milliseconds).
+ */
+const long interval = 2000;  // 2 seconds
+
+/**
+ * @brief Initializes the system, sets up WiFi, and connects to the server.
+ */
 void setup() {
   Serial.begin(115200);
   pinMode(groen, OUTPUT);
@@ -101,6 +177,10 @@ void setup() {
   client->connect(host, port);
 }
 
+/**
+ * @brief Checks access by reading the RFID card.
+ * @return Access status: 0 = no card detected, 1 = access allowed, 2 = access denied.
+ */
 int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
   if (!mfrc522.PICC_IsNewCardPresent()) {
     return 0;
@@ -109,14 +189,14 @@ int checkAccess() {  // 0 = niks gedetecteerd 1 = toegestaan 2 = niet toegestaan
     return 0;
   }
   if (mfrc522.uid.size == 4 && memcmp(mfrc522.uid.uidByte, myCardUID, 4) == 0) {
-    return 1;  //Hier dus zenden naar server dat degene erin mag
+    return 1;  // Hier dus zenden naar server dat degene erin mag
   }
   return 2;
 }
 
-float oudeTemp = 0.0;
-float oudeHumid = 0.0;
-
+/**
+ * @brief Reads temperature and humidity from the sensor and sends the data to the server if significant changes are detected.
+ */
 void readSensor() {
   if (client->space() < 40) {
     Serial.printf("Buffer to short for temp (%i)\r\n", client->space());
@@ -177,9 +257,10 @@ void readSensor() {
   }
   Serial.println();
 }
-unsigned long previousMillis = 0;
-const long interval = 2000;  // 2 seconds
 
+/**
+ * @brief Handles RFID access control, checking the card and sending the access status to the server.
+ */
 void handleRFID() {
   unsigned long currentMillis = millis();
 
@@ -207,6 +288,10 @@ void handleRFID() {
   }
   // }
 }
+
+/**
+ * @brief Main loop that checks client connection, handles RFID and sensor data, and sends data to the server if available.
+ */
 void loop() {
 
   if (!client || !client->connected()) {
@@ -250,7 +335,11 @@ void loop() {
   analogWrite(rood, 0);
 }
 
-// Helper routine to dump a byte array as hex values to Serial
+/**
+ * @brief Helper routine to dump a byte array as hex values to Serial.
+ * @param buffer Pointer to the byte array.
+ * @param bufferSize Size of the byte array.
+ */
 void dump_byte_array(byte* buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
